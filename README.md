@@ -13,6 +13,10 @@ Additional features in progress.
 
 ## Setup and Installation
 
+Follow directions [here](http://static.echonest.com/enspex/) to set up developer accounts for Spotify and The Echo Nest.
+
+Edit `userConfig.js` to fill in your third-party API Keys. This file is git ignored and should not be committed to a public repo. The current file uploaded is a template.
+
 Project runs on `node` and uses `bower` for file management. Run the following in the root:
 <pre>
 $ npm install
