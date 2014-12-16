@@ -1,0 +1,12 @@
+# Node Directory
+node_modules
+
+# Bower Directory
+public/bower_components
+
+# Sublime Project Files
+*.sublime-project
+*.sublime-workspace
+
+# OS Specific Files
+.DS_Store

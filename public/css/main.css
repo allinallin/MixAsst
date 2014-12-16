@@ -1,0 +1,41 @@
+img {
+    width: 100%;
+}
+body {
+    color: white;
+    background: black;
+    position: absolute;
+    width: 100%;
+    overflow-x: hidden;
+}
+.body-bg {
+    position: absolute;
+    width: 110%;
+    height: 110%;
+    top: -5%;
+    left: -5%;
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-position: center center;
+    -webkit-filter: blur(25px);
+    -moz-filter: blur(25px);
+    -o-filter: blur(25px);
+    -ms-filter: blur(25px);
+    filter: blur(25px);
+}
+input {
+    color: black;
+}
+.container {
+    position: relative;
+    background-color: rgba(0, 0, 0, 0.3);
+}
+.search-result {
+    position: relative;
+    overflow: hidden;
+    padding: 1em 0;
+}
+.search-result:hover {
+    background-color: rgba(0, 0, 0, 0.7);
+    transition: all 0.2s;
+}

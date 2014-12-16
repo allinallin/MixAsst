@@ -1,0 +1,49 @@
+<html>
+<head>
+	<meta charset="UTF-8">
+	<title>Echo Test</title>
+	<link rel="stylesheet" href="bower_components/bootstrap/dist/css/bootstrap.min.css">
+	<link rel="stylesheet" href="bower_components/bootstrap/dist/css/bootstrap-theme.min.css">
+	<link rel="stylesheet" href="css/main.css">
+</head>
+<body>
+	<div class="body-bg"></div>
+	<div class="container">
+		<h1>WTF is the song key</h1>
+		<form class="search-form">
+			<label>Enter the name of the song:</label><br />
+			<input type="text" size="50" value="katy perry">
+			<button class="btn-primary">Search</button>
+		</form>
+		<div class="search-results"></div>
+		<script id="search-results-template" type="text/x-handlebars-template">
+			<h2>Results</h2>
+				{{#each this}}
+				<div class="row search-result" data-id="{{uri}}">
+					<div class="col-md-1">
+						<img src="{{album.image_url}}">
+					</div>
+					<div class="col-md-4">
+						<ul class="list-unstyled">
+							<li>{{name}}</li>
+							<li>{{album.name}}</li>
+							<li>{{artist}}</li>
+						</ul>
+					</div>
+					<div class="col-md-4">
+						<ul class="list-unstyled">
+							<li class="key">Key: --</li>
+							<li class="tempo">Tempo: --</li>
+						</ul>
+					</div>
+				</div>
+				{{/each}}
+		</script>
+	</div>
+	
+	<script src="//ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+	<script src="bower_components/bootstrap/dist/js/bootstrap.min.js"></script>
+	<script src="//cdnjs.cloudflare.com/ajax/libs/handlebars.js/2.0.0-alpha.1/handlebars.min.js"></script>
+	<script src="js/main.js"></script>
+</body>
+</html>
