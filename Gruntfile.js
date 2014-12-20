@@ -24,9 +24,9 @@ module.exports = function(grunt) {
             server: {
                 files: ['.rebooted'],
                 options: {
-                  livereload: true
+                    livereload: true
                 }
-            } 
+            }
         },
         // nodemon
         nodemon: {
@@ -94,7 +94,7 @@ module.exports = function(grunt) {
     });
     // register task
     grunt.registerTask('build', function() {
-        grunt.task.run(['autoprefixer', 'sass']);
+        grunt.task.run(['sass','autoprefixer']);
     });
     grunt.registerTask('serve', function() {
         grunt.task.run(['build']);
