@@ -9,13 +9,13 @@ var app = express();
 app.use(express.static(__dirname + '/public')).use(cookieParser());
 
 // USER CONFIG
-var userConfig = require('./userConfig.js');
+var userConfig = require('./app/userConfig.js');
 var echo = echojs({
     key: userConfig.ECHONEST_KEY || process.env.ECHONEST_KEY
 });
 
 // ROUTES
-require('./routes.js')(app, request, querystring, echo);
+require('./app/routes.js')(app, request, querystring, echo);
 
 // BOOT
 console.log('Listening on 7000');

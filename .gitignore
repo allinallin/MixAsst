@@ -1,5 +1,11 @@
 # Private Files
-userConfig.js
+# userConfig.js
+
+# Sass
+.sass-cache
+
+# Nodemon files
+.rebooted
 
 # Node Directory
 node_modules
