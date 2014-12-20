@@ -3,7 +3,7 @@ img {
 }
 body {
     color: white;
-    background: red;
+    background: black;
     position: absolute;
     width: 100%;
     overflow-x: hidden;
@@ -17,10 +17,6 @@ body {
     background-size: cover;
     background-repeat: no-repeat;
     background-position: center center;
-    -webkit-filter: blur(25px);
-    -moz-filter: blur(25px);
-    -o-filter: blur(25px);
-    -ms-filter: blur(25px);
     filter: blur(25px);
 }
 input {

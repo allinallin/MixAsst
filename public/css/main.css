@@ -3,7 +3,7 @@ img {
 
 body {
   color: white;
-  background: red;
+  background: black;
   position: absolute;
   width: 100%;
   overflow-x: hidden; }
@@ -18,10 +18,7 @@ body {
   background-repeat: no-repeat;
   background-position: center center;
   -webkit-filter: blur(25px);
-  -moz-filter: blur(25px);
-  -o-filter: blur(25px);
-  -ms-filter: blur(25px);
-  filter: blur(25px); }
+          filter: blur(25px); }
 
 input {
   color: black; }
@@ -37,4 +34,7 @@ input {
 
 .search-result:hover {
   background-color: rgba(0, 0, 0, 0.7);
-  transition: all 0.2s; }
+  -webkit-transition: all 0.2s;
+          transition: all 0.2s; }
+
+/*# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbIm1haW4uY3NzIl0sIm5hbWVzIjpbXSwibWFwcGluZ3MiOiJBQUFBO0VBQ0UsYUFBWSxFQUFFOztBQUVoQjtFQUNFLGNBQWE7RUFDYixtQkFBa0I7RUFDbEIsb0JBQW1CO0VBQ25CLGFBQVk7RUFDWixvQkFBbUIsRUFBRTs7QUFFdkI7RUFDRSxvQkFBbUI7RUFDbkIsYUFBWTtFQUNaLGNBQWE7RUFDYixVQUFTO0VBQ1QsV0FBVTtFQUNWLHdCQUF1QjtFQUN2Qiw4QkFBNkI7RUFDN0Isb0NBQW1DO0VBQ25DLDRCQUFtQjtVQUFuQixvQkFBbUIsRUFBRTs7QUFFdkI7RUFDRSxjQUFhLEVBQUU7O0FBRWpCO0VBQ0Usb0JBQW1CO0VBQ25CLHNDQUFxQyxFQUFFOztBQUV6QztFQUNFLG9CQUFtQjtFQUNuQixrQkFBaUI7RUFDakIsZ0JBQWUsRUFBRTs7QUFFbkI7RUFDRSxzQ0FBcUM7RUFDckMsOEJBQXFCO1VBQXJCLHNCQUFxQixFQUFFIiwiZmlsZSI6Im1haW4uY3NzIiwic291cmNlc0NvbnRlbnQiOlsiaW1nIHtcbiAgd2lkdGg6IDEwMCU7IH1cblxuYm9keSB7XG4gIGNvbG9yOiB3aGl0ZTtcbiAgYmFja2dyb3VuZDogYmxhY2s7XG4gIHBvc2l0aW9uOiBhYnNvbHV0ZTtcbiAgd2lkdGg6IDEwMCU7XG4gIG92ZXJmbG93LXg6IGhpZGRlbjsgfVxuXG4uYm9keS1iZyB7XG4gIHBvc2l0aW9uOiBhYnNvbHV0ZTtcbiAgd2lkdGg6IDExMCU7XG4gIGhlaWdodDogMTEwJTtcbiAgdG9wOiAtNSU7XG4gIGxlZnQ6IC01JTtcbiAgYmFja2dyb3VuZC1zaXplOiBjb3ZlcjtcbiAgYmFja2dyb3VuZC1yZXBlYXQ6IG5vLXJlcGVhdDtcbiAgYmFja2dyb3VuZC1wb3NpdGlvbjogY2VudGVyIGNlbnRlcjtcbiAgZmlsdGVyOiBibHVyKDI1cHgpOyB9XG5cbmlucHV0IHtcbiAgY29sb3I6IGJsYWNrOyB9XG5cbi5jb250YWluZXIge1xuICBwb3NpdGlvbjogcmVsYXRpdmU7XG4gIGJhY2tncm91bmQtY29sb3I6IHJnYmEoMCwgMCwgMCwgMC4zKTsgfVxuXG4uc2VhcmNoLXJlc3VsdCB7XG4gIHBvc2l0aW9uOiByZWxhdGl2ZTtcbiAgb3ZlcmZsb3c6IGhpZGRlbjtcbiAgcGFkZGluZzogMWVtIDA7IH1cblxuLnNlYXJjaC1yZXN1bHQ6aG92ZXIge1xuICBiYWNrZ3JvdW5kLWNvbG9yOiByZ2JhKDAsIDAsIDAsIDAuNyk7XG4gIHRyYW5zaXRpb246IGFsbCAwLjJzOyB9XG4iXX0= */

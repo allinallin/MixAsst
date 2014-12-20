@@ -81,7 +81,7 @@ module.exports = function(grunt) {
                 expand: true,
                 flatten: true,
                 src: 'public/css/main.css',
-                dest: 'css'
+                dest: 'public/css'
             },
         },
         // run watch and nodemon at the same time
