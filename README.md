@@ -2,7 +2,7 @@
 Web app that displays helpful information on songs fetched from third-party music APIs.
 
 ## TODO
-Refer to workflow comments in `routes.js`.
+Refer to workflow comments in `app/routes.js`.
 
 ## Inspiration
 At the very early stage of creating a music mashup, DJs dedicate most of their effort to finding compatible song pairings. Many song characteristics are taken into account, including but not limited to: song key, tempo, genre, lyrics.
@@ -15,15 +15,15 @@ Additional features in progress.
 
 Follow directions [here](http://static.echonest.com/enspex/) to set up developer accounts for Spotify and The Echo Nest.
 
-Edit `userConfig.js` to fill in your third-party API Keys. This file is git ignored and should not be committed to a public repo. The current file uploaded is a template.
+Edit `app/userConfig.js` to fill in your third-party API Keys. This file is git ignored and should not be committed to a public repo. The current file uploaded is a template.
 
-Project runs on `node` and uses `bower` for file management. Run the following in the root:
+Project runs on `node` and uses `grunt` and `bower` for task and file management, respectively. Run the following in the root:
 <pre>
 $ npm install
 $ bower install
 </pre>
 
-Run `node app.js` in the root to start the server at `127.0.0.1:7000`.
+Run `grunt serve` in the root to start the server at `localhost:7000`.
 
 ## Stack Overview
 - [Spotify Web API](https://developer.spotify.com/web-api/)
