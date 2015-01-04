@@ -96,7 +96,7 @@ $trackTextColor: #ccc;
 	}
 }
 
-@media screen and (min-width: 640px) {
+@media screen and (min-width: 660px) {
 	.track {
 		margin-bottom: 0;
 		.art {
@@ -121,7 +121,7 @@ $trackTextColor: #ccc;
 			}
 		}
 		.specs {
-			width: 35%;
+			width: 36%;
 			max-width: 180px;
 			padding-left: 1.5em;
 			li {
@@ -130,7 +130,7 @@ $trackTextColor: #ccc;
 			}
 		}
 		.info {
-			width: 55%;
+			width: 54%;
 			padding-left: 1em;
 			li {
 				white-space: nowrap;
