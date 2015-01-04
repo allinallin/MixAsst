@@ -31,8 +31,19 @@
 					<div class="not-art">
 						<div class="specs">
 							<ul>
-								<li class="key">--
-								</li><li class="tempo">--</li>
+								<li class="key">
+									{{#if tonicFriendly}}
+										{{tonicFriendly}}
+									{{^}}
+										—
+									{{/if}}
+								</li><li class="tempo">
+									{{#if tempo}}
+										{{tempo}}
+									{{^}}
+										—
+									{{/if}}
+								</li>
 							</ul>
 						</div>
 						<div class="info">

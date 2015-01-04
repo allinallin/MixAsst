@@ -1,7 +1,9 @@
 var app = {
-	core: 	{},
-	api: 	{},
-	musescore: 	{}
+	core: {
+		queryList: [],
+		userList: []
+	},
+	api: {},
 };
 
 app.core.debug = false;
@@ -12,14 +14,14 @@ app.api.searchQuery = function ( searchValue, callback ) {
 	if (app.core.debug) {
 		$.ajax({
 			url: '/js/fakeQuery.json',
-      	success: onSuccess
+      		success: onSuccess
 		});
 	} else {
 		$.ajax({
-      url: '/search',
-      data: { q: searchValue },
-      success: onSuccess
-    });
+	      url: '/search',
+	      data: { q: searchValue },
+	      success: onSuccess
+	    });
 	}
 
   function onSuccess(data) {
@@ -27,28 +29,6 @@ app.api.searchQuery = function ( searchValue, callback ) {
     	callback(data);
   } 
 }
-
-/* Search Query Pt 2 */
-
-app.api.getTrackSpecs = function( ids, callback ) {
-	if (app.core.debug) {
-		$.ajax({
-			url: '/js/fakeTrackSpecs.json',
-      	success: onSuccess
-		});
-	} else {
-		$.ajax({
-      url: '/getTrackSpecs',
-      data: { ids: ids },
-      success: onSuccess
-    });
-	}
-
-  function onSuccess(data) {
-    if (callback && typeof(callback) == 'function')
-    	callback(data);
-  } 
-};
 
 /* Helper Functions */
 
@@ -65,30 +45,47 @@ function viewport() {
 	$(function() {
 		centerSearchBox();
 
-    $('.search-form').on('submit', function(e) {
-      e.preventDefault();
-      var searchVal = $('input').val();
-      app.api.searchQuery( searchVal, renderQueryResults );
-    });
+	    $('.search-form').on('submit', function(e) {
+	      e.preventDefault();
+	      var searchVal = $('input').val();
+	      app.api.searchQuery( searchVal, renderQueryResults );
+	    });
 
-    $(document).on('searchResultsLoaded', function(e) {
+	    $(document).on('searchResultsLoaded', function(e) {
 			moveSearchBox();
-    	animateTracks();
+	    	animateTracks();
+	    	setBodyBackground( e.tracks[0].album.image_url );
+	    });
 
-    	var tracks = e.tracks;
-    	app.core.searchResults = tracks;
+	    $(document).on('click', '.action button', function(e) {
+	    	var trackId = $(this).closest('.track').attr('data-id');
+	    	var queryList = app.core.queryList;
 
-    	if (!tracks) return;
+	    	for (var i = 0; i < queryList.length; i++) {
+	    		if (queryList[i].uri == trackId) {
+	    			app.core.userList.push(queryList[i]);
+	    			break;
+	    		}
+	    	};
 
-    	setBodyBackground( tracks[0].album.image_url );
-
-    	var trackIds = tracks.map(function( track ) {
-    		return track.uri;
-    	});
-
-    	app.api.getTrackSpecs( trackIds, displayTrackSpecs );
-    });
+	    	$(this).text('Added').prop('disabled', true);
+	    });
 	});
+
+	function renderQueryResults( jsonResults ) {
+		var hbsSource = $('#search-results-template').html();
+		var hbsTemplate = Handlebars.compile( hbsSource );
+		var $hbsPlaceholder = $('.search-results');
+
+		$hbsPlaceholder.html( hbsTemplate( jsonResults ) );
+		
+		$.event.trigger({
+			type: 'searchResultsLoaded',
+			tracks: jsonResults
+		});
+
+		app.core.queryList = jsonResults;
+	}
 
 	function animateTracks() {
 		var $tracks = $('.track');
@@ -116,19 +113,6 @@ function viewport() {
 		});
 	}
 
-	function renderQueryResults( jsonResults ) {
-		var hbsSource = $('#search-results-template').html();
-		var hbsTemplate = Handlebars.compile( hbsSource );
-		var $hbsPlaceholder = $('.search-results');
-
-		$hbsPlaceholder.html( hbsTemplate( jsonResults ) );
-
-		$.event.trigger({
-			type: 'searchResultsLoaded',
-			tracks: jsonResults
-		});
-	}
-
 	function moveSearchBox() {
 		var $searchWrapper = $('.search-wrapper');
 		var $searchResults = $('.search-results');
@@ -136,39 +120,6 @@ function viewport() {
 
 		$searchWrapper.add($searchResults).css({
 			transform: 'translate3d(0,0,0)'
-		});
-	}
-
-	function displayTrackSpecs( allTrackSpecs ) {
-		var $searchResultRows = $('.search-result');
-
-		for (var i = 0; i < allTrackSpecs.length; i++) {
-			var singleTrackSpecs = allTrackSpecs[i];
-			var $searchResult = $searchResultRows.filter(function() {
-				var elmId = this.getAttribute('data-id');
-				return singleTrackSpecs.spotifyId.indexOf(elmId) != -1;
-			});
-			
-			$searchResult
-				.find('.key')
-				.text(singleTrackSpecs.tonicFriendly);
-
-			$searchResult
-				.find('.tempo')
-				.text(singleTrackSpecs.tempo);
-
-			// if (singleTrackSpecs.whosampledUrl) {
-			// 	var $whosampledElm = $('<li><a>');
-			// 	$whosampledElm.children()
-			// 		.text('Whosampled')
-			// 		.attr('href', singleTrackSpecs.whosampledUrl);
-			// 	$searchResult.find('.tempo').after( $whosampledElm );
-			// }
-		};
-
-		$.event.trigger({
-			type: 'trackSpecsLoaded',
-			tracksSpecs: allTrackSpecs
 		});
 	}
 

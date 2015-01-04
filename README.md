@@ -2,7 +2,6 @@
 Web app that displays helpful information on songs fetched from third-party music APIs.
 
 ## TODO
-- Combine query and specs api calls
 - Preview track feature
 - Add list feature
 

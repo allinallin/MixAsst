@@ -10,29 +10,115 @@
  *  You should use the same approach for your own callbacks.
  *
  */
-module.exports = function(app, request, querystring, echo) {
-    // https://api.spotify.com/v1/search
+module.exports = function(app, request, querystring, Promise, echo) {
+    var requestP = Promise.promisify(request);
+
     app.get('/search', function(req, res) {
-        var reqUrl = 'https://api.spotify.com/v1/search?';
-        var reqParams = {
+        var searchResults = {
+            json: [],
+            ids: []
+        };
+
+        var spotifyReqUrl = 'https://api.spotify.com/v1/search?';
+
+        spotifyReqUrl += querystring.stringify({
             q: req.query.q,
             type: 'track',
             limit: 7
-        };
-        reqUrl += querystring.stringify(reqParams);
-
-        request(reqUrl, function(error, response, body) {
-            if (!error && response.statusCode === 200) {
-                condenseAndSendResponse(JSON.parse(body).tracks.items);
-                // res.send(JSON.parse(body).tracks.items);
-            } else {
-                console.log(error)
-                console.log(response.statusCode)
-            }
         });
+        
+        // https://api.spotify.com/v1/search
+        requestP(spotifyReqUrl)
+            .spread(function(response, body) {
+                var status = {
+                    code: response.statusCode
+                };
 
-        function condenseAndSendResponse(jsonFull) {
+                if (ClientError(status.code) || SpotifyError(status.code))
+                    throw new Error("Oh no!");
+
+                var jsonFull = JSON.parse(body).tracks.items;
+                var jsonShort = condenseSpotifyJSON(jsonFull);
+                var trackIds = jsonShort.map(function( track ) {
+                    return track.uri;
+                });
+
+                searchResults.json = jsonShort;
+                searchResults.trackIds = trackIds;
+
+                return getTrackSpecs(trackIds); // Promise
+            })
+            // http://developer.echonest.com/docs/v4/song/profile
+            .then(function(contents) {
+                var status = {
+                    code: contents.response.status.code,
+                    message: contents.response.status.message
+                };
+
+                if (ClientError(status.code) || EchonestError(status.code))
+                    throw new Error("Oh no!");
+
+                var jsonFull = contents.response.songs;
+                var jsonShort = condenseEchonestJSON(jsonFull, searchResults.trackIds);
+
+                return mergeIntoResults(jsonShort); // Json
+            })
+            .then(function(jsonFinal) {
+                res.send(jsonFinal);
+            })
+            .catch(function(err) {
+                console.log(err);
+            });
+
+        function mergeIntoResults(specResults) {
+            var mainResults = searchResults.json;
+
+            for (var i = 0; i < specResults.length; i++) {
+                var singleSpec = specResults[i];
+                for (var j = 0; j < mainResults.length; j++) {
+                    if (singleSpec.spotifyId.indexOf(mainResults[j].uri) != -1) {
+                        mainResults[j].key = singleSpec.key;
+                        mainResults[j].mode = singleSpec.mode;
+                        mainResults[j].tempo = singleSpec.tempo;
+                        mainResults[j].tonicFriendly = singleSpec.tonicFriendly;
+                        mainResults[j].whosampledUrl = singleSpec.whosampledUrl;
+                    }
+                };
+            };
+
+            return mainResults;
+        }
+
+        function getTrackSpecs(trackArray) {
+            return new Promise(function(resolve, reject) {
+                echo('song/profile').get({
+                    track_id: trackArray,
+                    bucket: ['audio_summary', 'tracks', 'id:whosampled', 'id:spotify']
+                }, function(err, json) {
+                    if (err) {
+                        reject(err);
+                    } else if (json) {
+                        resolve(json);
+                    }
+                });
+            });
+        }
+        
+        function ClientError(e) {
+            return e.code >= 400 && e.code < 500;
+        }
+
+        function SpotifyError(e) {
+            return e.code == 200;
+        }
+
+        function EchonestError(e) {
+            return e.code == 0;
+        }
+
+        function condenseSpotifyJSON(jsonFull) {
             var jsonTrimmed = [];
+
             for (var i = 0; i < jsonFull.length; i++) {
                 var singleTrack = jsonFull[i];
                 var info = {
@@ -49,27 +135,11 @@ module.exports = function(app, request, querystring, echo) {
                 };
                 jsonTrimmed.push(info);
             };
-            res.send(jsonTrimmed);
+
+            return jsonTrimmed;
         }
-    });
-    // http://developer.echonest.com/docs/v4/song/profile
-    app.get('/getTrackSpecs', function(req, res) {
-        var reqIds = req.query.ids;
 
-        echo('song/profile').get({
-            track_id: reqIds,
-            bucket: ['audio_summary', 'tracks', 'id:whosampled', 'id:spotify']
-        }, function(error, json) {
-            if (!error && json.response.status.code === 0) {
-                condenseAndSendResponse(json.response.songs);
-            } else {
-                console.log(error);
-                console.log(json.response.status.code);
-                console.log(json.response.status.message);
-            }
-        });
-
-        function condenseAndSendResponse(jsonFull) {
+        function condenseEchonestJSON(jsonFull, trackIds) {
             var jsonTrimmed = [];
             for (var i = 0; i < jsonFull.length; i++) {
                 var singleTrack = jsonFull[i];
@@ -81,10 +151,10 @@ module.exports = function(app, request, querystring, echo) {
                 };
                 info.tonicFriendly = getTonicFriendly(info.key, info.mode);
                 info.whosampledUrl = getWhosampledUrl(singleTrack.tracks);
-                info.spotifyId = getSpotifyId(singleTrack.tracks);
+                info.spotifyId = getSpotifyId(singleTrack.tracks, trackIds);
                 jsonTrimmed.push(info);
             };
-            res.send(jsonTrimmed);
+            return jsonTrimmed;
         }
 
         function getTonicFriendly(key, mode) {
@@ -127,14 +197,14 @@ module.exports = function(app, request, querystring, echo) {
             return url;
         }
 
-        function getSpotifyId(idInfo) {
+        function getSpotifyId(idInfo, trackIds) {
             if (!idInfo) return null;
 
             var ids = [];
             
             for (var i = 0; i < idInfo.length; i++) {
                 if (idInfo[i].catalog == 'spotify') {
-                    if (reqIds.indexOf( idInfo[i].foreign_id ) != -1)
+                    if (trackIds.indexOf( idInfo[i].foreign_id ) != -1)
                         ids.push( idInfo[i].foreign_id );
                 }
             };
