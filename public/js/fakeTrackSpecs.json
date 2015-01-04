@@ -1,0 +1,50 @@
+[{
+    "name": "Problem",
+    "key": 1,
+    "mode": 0,
+    "tempo": 103.021,
+    "tonicFriendly": "C# Minor",
+    "spotifyId": ["spotify:track:6xCNYRfzZtoQRo1xruPmNq"]
+}, {
+    "name": "Bang Bang",
+    "key": 0,
+    "mode": 0,
+    "tempo": 150.02,
+    "tonicFriendly": "C Minor",
+    "spotifyId": ["spotify:track:3SaIsrEzrQGDcG1jCeaK8q"]
+}, {
+    "name": "Break Free",
+    "key": 7,
+    "mode": 0,
+    "tempo": 129.96,
+    "tonicFriendly": "G Minor",
+    "spotifyId": ["spotify:track:1T7Htpf1kEvU9Adf8J0ekk"]
+}, {
+    "name": "Best Mistake",
+    "key": 6,
+    "mode": 1,
+    "tempo": 143.941,
+    "tonicFriendly": "F# Major",
+    "spotifyId": ["spotify:track:61707mcFfjlHcedjmRCr1L"]
+}, {
+    "name": "One Last Time",
+    "key": 8,
+    "mode": 1,
+    "tempo": 124.995,
+    "tonicFriendly": "G# Major",
+    "spotifyId": ["spotify:track:2OlWBmSjf1aUPGLNf0UI5A"]
+}, {
+    "name": "Love Me Harder",
+    "key": 1,
+    "mode": 0,
+    "tempo": 99.093,
+    "tonicFriendly": "C# Minor",
+    "spotifyId": ["spotify:track:1aKsg5b9sOngINaQXbB0P7"]
+}, {
+    "name": "All My Love - From \"The Hunger Games: Mockingjay Part 1\" Soundtrack",
+    "key": 5,
+    "mode": 1,
+    "tempo": 115.016,
+    "tonicFriendly": "F Major",
+    "spotifyId": ["spotify:track:1fMCZGliRhTuRzxZbY6iOe"]
+}]

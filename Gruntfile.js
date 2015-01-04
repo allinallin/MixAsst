@@ -19,7 +19,7 @@ module.exports = function(grunt) {
                 options: {
                     livereload: true
                 },
-                files: ['public/css/**/*.css', 'public/**/*.php', 'public/js/**/*.js', 'public/img/**/*.{png,jpg,jpeg,gif,webp,svg}']
+                files: ['public/css/**/*.css', 'public/**/*.{php,html}', 'public/js/**/*.js', 'public/img/**/*.{png,jpg,jpeg,gif,webp,svg}']
             },
             server: {
                 files: ['.rebooted'],

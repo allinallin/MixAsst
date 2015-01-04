@@ -2,7 +2,8 @@
 Web app that displays helpful information on songs fetched from third-party music APIs.
 
 ## TODO
-Refer to workflow comments in `app/routes.js`.
+- Preview track feature
+- Add list feature
 
 ## Inspiration
 At the very early stage of creating a music mashup, DJs dedicate most of their effort to finding compatible song pairings. Many song characteristics are taken into account, including but not limited to: song key, tempo, genre, lyrics.

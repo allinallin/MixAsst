@@ -1,0 +1,38 @@
+html, body {
+    overflow-x: hidden;
+}
+body {
+    color: white;
+    background: black;
+    width: 100%;
+    font-family: 'Lato', sans-serif;
+    position: relative;
+}
+img {
+    width: 100%;
+}
+.body-bg {
+    position: absolute;
+    width: 110%;
+    height: 110%;
+    top: -5%;
+    left: -5%;
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-position: center center;
+    opacity: 0;
+    filter: blur(25px);
+    transition: all 0.2s;
+    &.show {
+        opacity: 1;
+    }
+}
+.container {
+    position: relative;
+    background-color: rgba(0, 0, 0, 0.3);
+    padding: 0 10px 2em;
+    box-sizing: border-box;
+    margin: 0 auto;
+    max-width: 960px;
+}
+.no-transition { transition: none!important; }

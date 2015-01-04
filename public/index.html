@@ -1,41 +1,50 @@
 <html>
 <head>
 	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<title>Echo Test</title>
-	<link rel="stylesheet" href="bower_components/bootstrap/dist/css/bootstrap.min.css">
-	<link rel="stylesheet" href="bower_components/bootstrap/dist/css/bootstrap-theme.min.css">
+	<link href='http://fonts.googleapis.com/css?family=Lato:400,700' rel='stylesheet' type='text/css'>
+	<link rel="stylesheet" href="bower_components/font-awesome/css/font-awesome.min.css">
+	<link rel="stylesheet" href="bower_components/normalize.css/normalize.css">
+	<link rel="stylesheet" href="bower_components/toast/css/grid.css">
 	<link rel="stylesheet" href="css/main.css">
 	<script src="//localhost:35729/livereload.js"></script>
 </head>
 <body>
 	<div class="body-bg"></div>
 	<div class="container">
-		<h1>WTF is the song key</h1>
-		<form class="search-form">
-			<label>Enter the name of the song:</label><br />
-			<input type="text" size="50" value="katy perry">
-			<button class="btn-primary">Search</button>
-		</form>
+		<div class="search-wrapper">
+			<!-- <h1>MixAsst</h1> -->
+			<p>search for a song</p>
+			<form class="search-form">
+				<input type="text" value="katy perry" placeholder="firework katy perry">
+				<button class="btn-primary"><i class="fa fa-search"></i></button>
+			</form>
+		</div>
 		<div class="search-results"></div>
 		<script id="search-results-template" type="text/x-handlebars-template">
-			<h2>Results</h2>
 				{{#each this}}
-				<div class="row search-result" data-id="{{uri}}">
-					<div class="col-md-1">
+				<div class="search-result track" data-id="{{uri}}">
+					<div class="art">
 						<img src="{{album.image_url}}">
 					</div>
-					<div class="col-md-4">
-						<ul class="list-unstyled">
-							<li>{{name}}</li>
-							<li>{{album.name}}</li>
-							<li>{{artist}}</li>
-						</ul>
+					<div class="not-art">
+						<div class="specs">
+							<ul>
+								<li class="key">--
+								</li><li class="tempo">--</li>
+							</ul>
+						</div>
+						<div class="info">
+							<ul>
+								<li>{{name}}</li>
+								<li>{{artist}}</li>
+								<li>{{album.name}}</li>
+							</ul>
+						</div>
 					</div>
-					<div class="col-md-4">
-						<ul class="list-unstyled">
-							<li class="key">Key: --</li>
-							<li class="tempo">Tempo: --</li>
-						</ul>
+					<div class="action">
+						<button>Add to List</button>
 					</div>
 				</div>
 				{{/each}}
@@ -43,7 +52,6 @@
 	</div>
 	
 	<script src="//ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
-	<script src="bower_components/bootstrap/dist/js/bootstrap.min.js"></script>
 	<script src="//cdnjs.cloudflare.com/ajax/libs/handlebars.js/2.0.0-alpha.1/handlebars.min.js"></script>
 	<script src="js/main.js"></script>
 </body>

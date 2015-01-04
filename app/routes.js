@@ -9,24 +9,6 @@
  *  
  *  You should use the same approach for your own callbacks.
  *
- * 
- * Work Flow for Key Detection
- *
- * 1. Enter search query
- * 2. Get back list of results
- *  a. key
- *  b. player + image
- * 3. Click to save song to another list
- * 4. Export saved list to spotify playlist
- *
- * 1. Enter search query
- * 2. Choose song from list of results
- * 3. Load Spotify Player
- * 4. Get track ID for Echonest
- * 5. Get Echonest track info including key
- *
- * 6. Prepare for other API services
- *
  */
 module.exports = function(app, request, querystring, echo) {
     // https://api.spotify.com/v1/search
