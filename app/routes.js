@@ -43,7 +43,7 @@ module.exports = function(app, request, querystring, Promise, echo) {
                     return track.uri;
                 });
 
-                searchResults.json = jsonShort;
+                searchResults.json = addTopLevelToJson(jsonShort, 'uri');
                 searchResults.trackIds = trackIds;
 
                 return getTrackSpecs(trackIds); // Promise
@@ -69,6 +69,19 @@ module.exports = function(app, request, querystring, Promise, echo) {
             .catch(function(err) {
                 console.log(err);
             });
+
+        function addTopLevelToJson(targetJson, targetKey) {
+            var newObj = {};
+
+            for (var i = 0; i < targetJson.length; i++) {
+                var targetValue = targetJson[i][targetKey];
+                if (!newObj.hasOwnProperty(targetValue)) {
+                    newObj[targetValue] = targetJson[i];
+                }
+            };
+
+            return newObj;
+        }
 
         function getTrackSpecs(trackArray) {
             return new Promise(function(resolve, reject) {
@@ -106,7 +119,7 @@ module.exports = function(app, request, querystring, Promise, echo) {
                     uri: singleTrack.uri,
                     name: singleTrack.name,
                     album: {
-                        image_url: singleTrack.album.images[0].url,
+                        image_url: singleTrack.album.images[1].url,
                         name: singleTrack.album.name
                     },
                     artist: singleTrack.artists.map(function(artist) {
@@ -198,13 +211,16 @@ module.exports = function(app, request, querystring, Promise, echo) {
 
             for (var i = 0; i < specResults.length; i++) {
                 var singleSpec = specResults[i];
-                for (var j = 0; j < mainResults.length; j++) {
-                    if (singleSpec.spotifyId.indexOf(mainResults[j].uri) != -1) {
-                        mainResults[j].key = singleSpec.key;
-                        mainResults[j].mode = singleSpec.mode;
-                        mainResults[j].tempo = singleSpec.tempo;
-                        mainResults[j].tonicFriendly = singleSpec.tonicFriendly;
-                        mainResults[j].whosampledUrl = singleSpec.whosampledUrl;
+                var singleSpecId = singleSpec.spotifyId;
+
+                for (var j = 0; j < singleSpecId.length; j++) {
+                    if (mainResults.hasOwnProperty(singleSpecId[j])) {
+                        var matchedResult = mainResults[singleSpecId[j]];
+                        matchedResult.key = singleSpec.key;
+                        matchedResult.mode = singleSpec.mode;
+                        matchedResult.tempo = singleSpec.tempo;
+                        matchedResult.tonicFriendly = singleSpec.tonicFriendly;
+                        matchedResult.whosampledUrl = singleSpec.whosampledUrl;
                     }
                 };
             };

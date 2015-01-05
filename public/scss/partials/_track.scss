@@ -1,7 +1,26 @@
 $trackTextColor: #ccc;
 
-.search-results {
+.query-list,
+.user-list {
 	transition: all 0.4s;
+	> * {
+		max-width: 750px;
+		margin-left: auto;
+		margin-right: auto;
+	}
+}
+
+.user-list {
+	display: none;
+}
+
+[data-mode=user] {
+	.query-list {
+		display: none;
+	}
+	.user-list {
+		display: block;
+	}
 }
 
 @for $i from 1 through 10 {
@@ -18,8 +37,7 @@ $trackTextColor: #ccc;
     overflow: hidden;
     padding: 1em;
     box-sizing: border-box;
-    margin: 0 auto 1em;
-    max-width: 750px;
+    margin-bottom: 1em;
     box-shadow: 0 0 5px 0 rgba(0,0,0,0.4);
     transition: transform 0.4s;
     opacity: 0;

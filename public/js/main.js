@@ -1,33 +1,31 @@
+'use strict';
+
 var app = {
+	debug: false,
 	core: {
-		queryList: [],
-		userList: []
+		queryList: {},
+		userList: {}
 	},
-	api: {},
+	api: {}
 };
 
-app.core.debug = false;
+// app.debug = true;
 
 /* Search Query */
 
 app.api.searchQuery = function ( searchValue, callback ) {
-	if (app.core.debug) {
-		$.ajax({
-			url: '/js/fakeQuery.json',
-      		success: onSuccess
-		});
-	} else {
-		$.ajax({
-	      url: '/search',
-	      data: { q: searchValue },
-	      success: onSuccess
-	    });
-	}
+	var url = app.debug ? '/js/fakeQuery.json' : '/search';
 
-  function onSuccess(data) {
-    if (callback && typeof(callback) == 'function')
-    	callback(data);
-  } 
+	$.ajax({
+		url: url,
+		data: { q: searchValue },
+		success: onSuccess
+    });
+
+	function onSuccess(data) {
+		if (callback && typeof(callback) == 'function')
+			callback(data);
+	} 
 }
 
 /* Helper Functions */
@@ -41,61 +39,95 @@ function viewport() {
     };
 };
 
-(function iife(window, document, app, $) {
+(function iife(window, document, app, $, store) {
+
+	app.core.userList = store.get('mixasst_user_list') || {};
+
 	$(function() {
+    	updateUserListCount();
 		centerSearchBox();
 
 	    $('.search-form').on('submit', function(e) {
 	      e.preventDefault();
 	      var searchVal = $('input').val();
-	      app.api.searchQuery( searchVal, renderQueryResults );
+	      app.api.searchQuery( searchVal, renderQueryList );
 	    });
+	    
+		$(document).on('click', '.user-bar button', renderUserList);
 
-	    $(document).on('searchResultsLoaded', function(e) {
+	    $(document).on('trackListLoaded', function(e) {
 			moveSearchBox();
 	    	animateTracks();
-	    	setBodyBackground( e.tracks[0].album.image_url );
+
+	    	for (var track in e.tracks) {
+	    		setBodyBackground( e.tracks[track].album.image_url );
+	    		break;
+	    	}
 	    });
 
-	    $(document).on('click', '.action button', function(e) {
-	    	var trackId = $(this).closest('.track').attr('data-id');
-	    	var queryList = app.core.queryList;
+	    $(document).on('click', '.action button', addRemoveTrack);
 
-	    	for (var i = 0; i < queryList.length; i++) {
-	    		if (queryList[i].uri == trackId) {
-	    			app.core.userList.push(queryList[i]);
-	    			break;
-	    		}
-	    	};
-
-	    	$(this).text('Added').prop('disabled', true);
-	    });
 	});
 
-	function renderQueryResults( jsonResults ) {
-		var hbsSource = $('#search-results-template').html();
+	function addRemoveTrack() {
+    	var trackId = $(this).closest('.track').attr('data-id');
+
+    	if (app.core.userList.hasOwnProperty(trackId)) {
+			delete app.core.userList[trackId];
+			$(this).text('Add to List');
+    	} else {
+			app.core.userList[trackId] = app.core.queryList[trackId];
+			app.core.userList[trackId].onUserList = true;
+			$(this).text('Remove');
+    	}
+
+    	updateUserListCount();
+
+    	store.set('mixasst_user_list', app.core.userList);
+	}
+
+	function updateUserListCount() {
+		var $countElm = $('.count', '.user-bar');
+		var trackCount = Object.keys(app.core.userList).length;
+
+		$countElm.text(trackCount);
+	}
+
+	function renderQueryList( jsonResults ) {
+		var hbsSource = $('#track-list-template').html();
 		var hbsTemplate = Handlebars.compile( hbsSource );
-		var $hbsPlaceholder = $('.search-results');
+		var $hbsPlaceholder = $('.list', '.query-list');
 		var userList = app.core.userList;
 
-		for (var i = 0; i < userList.length; i++) {
-			var userTrack = userList[i];
-			for (var j = 0; j < jsonResults.length; j++) {
-				if (userTrack.uri == jsonResults[j].uri) {
-					jsonResults[j].onUserList = true;
-					break;
-				}
-			};
-		};
+		$('.container').attr('data-mode', 'query');
+		for (var trackId in userList) {
+			if (userList.hasOwnProperty(trackId) && jsonResults.hasOwnProperty(trackId)) {
+				jsonResults[trackId].onUserList = true;
+			}
+		}
 
 		$hbsPlaceholder.html( hbsTemplate( jsonResults ) );
 		
 		$.event.trigger({
-			type: 'searchResultsLoaded',
+			type: 'trackListLoaded',
 			tracks: jsonResults
 		});
 
 		app.core.queryList = jsonResults;
+	}
+
+	function renderUserList() {
+		var hbsSource = $('#track-list-template').html();
+		var hbsTemplate = Handlebars.compile( hbsSource );
+		var $hbsPlaceholder = $('.list', '.user-list');
+
+		$('.container').attr('data-mode', 'user');
+		$hbsPlaceholder.html( hbsTemplate( app.core.userList ) );
+
+		$.event.trigger({
+			type: 'trackListLoaded',
+			tracks: app.core.userList
+		});
 	}
 
 	function animateTracks() {
@@ -103,6 +135,7 @@ function viewport() {
 
 		$tracks
 			.addClass('no-transition')
+			.removeClass('show')
 			.css({
 				transform: 'translate3d(0,'+viewport().height+'px,0)'
 			});
@@ -126,10 +159,8 @@ function viewport() {
 
 	function moveSearchBox() {
 		var $searchWrapper = $('.search-wrapper');
-		var $searchResults = $('.search-results');
-		var formTop = $('form', $searchWrapper).offset().top;
 
-		$searchWrapper.add($searchResults).css({
+		$searchWrapper.css({
 			transform: 'translate3d(0,0,0)'
 		});
 	}
@@ -149,4 +180,4 @@ function viewport() {
 
 		$img[0].src = imageUrl;
 	}
-})(window, document, app, jQuery);
+})(window, document, app, jQuery, store);
