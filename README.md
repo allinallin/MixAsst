@@ -32,8 +32,10 @@ Run `grunt serve` in the root to start the server at `localhost:7000`.
 - [Spotify Web API](https://developer.spotify.com/web-api/)
 - [The Echo Nest API](http://developer.echonest.com/)
 - [echojs](https://github.com/tcr/echojs) - Echo Nest node.js helper
-- [Bootstrap](http://getbootstrap.com/)
 - [jQuery](http://jquery.com/)
+- [store.js](https://github.com/marcuswestin/store.js) - localStorage helper
+- [Handlebars](http://handlebarsjs.com/)
+- [Grunt](http://gruntjs.com/)
 - [Bower](http://bower.io/)
 
 ## Beyond

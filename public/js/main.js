@@ -48,9 +48,14 @@ function viewport() {
 		centerSearchBox();
 
 	    $('.search-form').on('submit', function(e) {
-	      e.preventDefault();
-	      var searchVal = $('input').val();
-	      app.api.searchQuery( searchVal, renderQueryList );
+			e.preventDefault();
+			var searchVal = $('input').val();
+	
+			if (!searchVal) {
+				searchVal = 'firework katy perry';
+				$('input').val(searchVal);
+			}
+	    	app.api.searchQuery( searchVal, renderQueryList );
 	    });
 	    
 		$(document).on('click', '.user-bar button', renderUserList);
