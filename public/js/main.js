@@ -76,6 +76,17 @@ function viewport() {
 		var hbsSource = $('#search-results-template').html();
 		var hbsTemplate = Handlebars.compile( hbsSource );
 		var $hbsPlaceholder = $('.search-results');
+		var userList = app.core.userList;
+
+		for (var i = 0; i < userList.length; i++) {
+			var userTrack = userList[i];
+			for (var j = 0; j < jsonResults.length; j++) {
+				if (userTrack.uri == jsonResults[j].uri) {
+					jsonResults[j].onUserList = true;
+					break;
+				}
+			};
+		};
 
 		$hbsPlaceholder.html( hbsTemplate( jsonResults ) );
 		

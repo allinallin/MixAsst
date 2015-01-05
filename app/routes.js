@@ -70,25 +70,6 @@ module.exports = function(app, request, querystring, Promise, echo) {
                 console.log(err);
             });
 
-        function mergeIntoResults(specResults) {
-            var mainResults = searchResults.json;
-
-            for (var i = 0; i < specResults.length; i++) {
-                var singleSpec = specResults[i];
-                for (var j = 0; j < mainResults.length; j++) {
-                    if (singleSpec.spotifyId.indexOf(mainResults[j].uri) != -1) {
-                        mainResults[j].key = singleSpec.key;
-                        mainResults[j].mode = singleSpec.mode;
-                        mainResults[j].tempo = singleSpec.tempo;
-                        mainResults[j].tonicFriendly = singleSpec.tonicFriendly;
-                        mainResults[j].whosampledUrl = singleSpec.whosampledUrl;
-                    }
-                };
-            };
-
-            return mainResults;
-        }
-
         function getTrackSpecs(trackArray) {
             return new Promise(function(resolve, reject) {
                 echo('song/profile').get({
@@ -210,6 +191,25 @@ module.exports = function(app, request, querystring, Promise, echo) {
             };
             
             return ids;
+        }
+
+        function mergeIntoResults(specResults) {
+            var mainResults = searchResults.json;
+
+            for (var i = 0; i < specResults.length; i++) {
+                var singleSpec = specResults[i];
+                for (var j = 0; j < mainResults.length; j++) {
+                    if (singleSpec.spotifyId.indexOf(mainResults[j].uri) != -1) {
+                        mainResults[j].key = singleSpec.key;
+                        mainResults[j].mode = singleSpec.mode;
+                        mainResults[j].tempo = singleSpec.tempo;
+                        mainResults[j].tonicFriendly = singleSpec.tonicFriendly;
+                        mainResults[j].whosampledUrl = singleSpec.whosampledUrl;
+                    }
+                };
+            };
+
+            return mainResults;
         }
     });
 };

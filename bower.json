@@ -2,9 +2,7 @@
   "name": "mixasst",
   "private": true,
   "dependencies": {
-    "toast": "https://github.com/daneden/Toast.git#~1.0.0",
-    "normalize.css": "~3.0.2",
-    "font-awesome": "~4.2.0"
+    "normalize.css": "~3.0.2"
   },
   "devDependencies": {}
 }
