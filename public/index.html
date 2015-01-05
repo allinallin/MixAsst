@@ -2,17 +2,16 @@
 <head>
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
-	<title>Echo Test</title>
-	<link href='http://fonts.googleapis.com/css?family=Lato:400,700' rel='stylesheet' type='text/css'>
-	<link rel="stylesheet" href="bower_components/font-awesome/css/font-awesome.min.css">
-	<link rel="stylesheet" href="bower_components/normalize.css/normalize.css">
-	<link rel="stylesheet" href="bower_components/toast/css/grid.css">
-	<link rel="stylesheet" href="css/main.css">
+	<title>MixAsst</title>
+	<link href="//fonts.googleapis.com/css?family=Lato:400,700" rel="stylesheet">
+	<link href="//maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css" rel="stylesheet">
+	<link href="bower_components/normalize.css/normalize.css" rel="stylesheet">
+	<link href="css/main.css" rel="stylesheet">
 	<script src="//localhost:35729/livereload.js"></script>
 </head>
 <body>
 	<div class="body-bg"></div>
-	<div class="container">
+	<div class="container" data-mode="query">
 		<div class="search-wrapper">
 			<!-- <h1>MixAsst</h1> -->
 			<p>search for a song</p>
@@ -21,38 +20,67 @@
 				<button class="btn-primary"><i class="fa fa-search"></i></button>
 			</form>
 		</div>
-		<div class="search-results"></div>
-		<script id="search-results-template" type="text/x-handlebars-template">
-				{{#each this}}
-				<div class="search-result track" data-id="{{uri}}">
-					<div class="art">
-						<img src="{{album.image_url}}">
-					</div>
-					<div class="not-art">
-						<div class="specs">
-							<ul>
-								<li class="key">--
-								</li><li class="tempo">--</li>
-							</ul>
-						</div>
-						<div class="info">
-							<ul>
-								<li>{{name}}</li>
-								<li>{{artist}}</li>
-								<li>{{album.name}}</li>
-							</ul>
-						</div>
-					</div>
-					<div class="action">
-						<button>Add to List</button>
-					</div>
-				</div>
-				{{/each}}
-		</script>
+		<div class="query-list">
+			<div class="list"></div>
+		</div>
+		<div class="user-list">
+			<h2>My List</h2>
+			<div class="list"></div>
+		</div>
+	</div>
+	<div class="user-bar">
+		<button>
+			My List (<span class="count">0</span>)
+		</button>
 	</div>
 	
+	<script id="track-list-template" type="text/x-handlebars-template">
+		{{#each this}}
+		<div class="track" data-id="{{uri}}">
+			<div class="art">
+				<img src="{{album.image_url}}">
+			</div>
+			<div class="not-art">
+				<div class="specs">
+					<ul>
+						<li class="key">
+							{{#if tonicFriendly}}
+								{{tonicFriendly}}
+							{{^}}
+								—
+							{{/if}}
+						</li><li class="tempo">
+							{{#if tempo}}
+								{{tempo}}
+							{{^}}
+								—
+							{{/if}}
+						</li>
+					</ul>
+				</div>
+				<div class="info">
+					<ul>
+						<li>{{name}}</li>
+						<li>{{artist}}</li>
+						<li>{{album.name}}</li>
+					</ul>
+				</div>
+			</div>
+			<div class="action">
+				{{#if onUserList}}
+					<button>Remove</button>
+				{{^}}
+					<button>Add to List</button>
+				{{/if}}
+			</div>
+		</div>
+		{{else}}
+		<p>No tracks found!</p>
+		{{/each}}
+	</script>
 	<script src="//ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
 	<script src="//cdnjs.cloudflare.com/ajax/libs/handlebars.js/2.0.0-alpha.1/handlebars.min.js"></script>
+	<script src="bower_components/store-js/store.min.js"></script>
 	<script src="js/main.js"></script>
 </body>
 </html>

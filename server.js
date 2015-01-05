@@ -4,6 +4,8 @@ var request = require('request');
 var querystring = require('querystring');
 var cookieParser = require('cookie-parser');
 var echojs = require('echojs');
+var Promise = require("bluebird");
+
 var app = express();
 
 app.use(express.static(__dirname + '/public')).use(cookieParser());
@@ -15,7 +17,7 @@ var echo = echojs({
 });
 
 // ROUTES
-require('./app/routes.js')(app, request, querystring, echo);
+require('./app/routes.js')(app, request, querystring, Promise, echo);
 
 // BOOT
 console.log('Listening on 7000');
