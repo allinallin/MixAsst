@@ -1,5 +1,6 @@
 html, body {
     overflow-x: hidden;
+    height: 100%;
 }
 body {
     color: white;
@@ -12,7 +13,7 @@ img {
     width: 100%;
 }
 .body-bg {
-    position: absolute;
+    position: fixed;
     width: 110%;
     height: 110%;
     top: -5%;
