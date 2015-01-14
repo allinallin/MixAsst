@@ -9,9 +9,9 @@ $trackTextColor: #ccc;
 	}
 }
 
-@keyframes record-initial {
+@keyframes track-to-black {
 	to {
-		transform: rotate(0deg);
+		background: rgba(0,0,0,1);
 	}
 }
 
@@ -113,27 +113,49 @@ $trackTextColor: #ccc;
 			position: relative;
 			margin: -25% 0 0 -25%;
 		}
-		.pause {
+		.pause,
+		.spinner {
 			display: none;
 		}
 	}
 	&.active {
-		.play {
+		animation: track-to-black 2s linear 0s infinite alternate;
+		animation-play-state: paused;
+		.art img {
+			border-radius: 50%;
+			animation: record-spin 5s linear 0s 6;
+			animation-play-state: paused;
+		}
+	}
+	&.playing {
+		animation-play-state: running;
+		.play,
+		.spinner {
 			display: none;
 		}
 		.pause {
 			display: block;
 		}
 		.art img {
-			border-radius: 50%;
-			animation: record-spin 5s linear 0s 6;
+			animation-play-state: running;
+		}
+	}
+	&.loading {
+		.play,
+		.pause {
+			display: none;
+		}
+		.spinner {
+			display: block;
 		}
 	}
 	&.paused {
+		animation-play-state: paused;
 		.play {
 			display: block;
 		}
-		.pause {
+		.pause,
+		.spinner {
 			display: none;
 		}
 		.art img {

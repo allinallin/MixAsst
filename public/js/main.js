@@ -84,27 +84,40 @@ function viewport() {
 		if (app.core.activeTrack.length && app.core.activeTrack[0].src !== audio.src) {
 			app.core.activeTrack[0].pause();
 			app.core.activeTrack[0].currentTime = 0;
-			onTrackEnd.call(app.core.activeTrack[0]);
+			onTrackEnded.call(app.core.activeTrack[0]);
 		}
 
+		$track.addClass('active');
+		app.core.activeTrack = [audio];
+
+		if (!$track.hasClass('init')) {
+			$track.addClass('init loading');
+
+			$(audio).on('playing', onTrackPlaying);
+			$(audio).on('pause', onTrackPause);
+			$(audio).on('ended', onTrackEnded);
+		}
+		
 		if (audio.paused) {
-			$track.addClass('active').removeClass('paused');
 			audio.play();
-			app.core.activeTrack = [audio];
 		} else {
-			$track.addClass('paused');
 			audio.pause();
-		}
-
-		if (!$track.hasClass('played')) {
-			$(audio).on('ended', onTrackEnd);
-			$track.addClass('played');
 		}
 	}
 
-	function onTrackEnd() {
+	function onTrackPlaying() {
 		var $track = $(this).closest('.track');
-		$track.removeClass('active paused');
+		$track.removeClass('loading paused').addClass('playing');
+	}
+
+	function onTrackPause() {
+		var $track = $(this).closest('.track');
+		$track.removeClass('loading playing').addClass('paused');
+	}
+
+	function onTrackEnded() {
+		var $track = $(this).closest('.track');
+		$track.removeClass('active loading playing paused');
 		app.core.activeTrack = [];
 	}
 
