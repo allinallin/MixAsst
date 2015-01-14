@@ -1,5 +1,20 @@
 $trackTextColor: #ccc;
 
+@keyframes record-spin {
+	from {
+		transform: rotate(0deg);
+	}
+	to {
+		transform: rotate(360deg);
+	}
+}
+
+@keyframes record-initial {
+	to {
+		transform: rotate(0deg);
+	}
+}
+
 .query-list,
 .user-list {
 	transition: all 0.4s;
@@ -68,10 +83,62 @@ $trackTextColor: #ccc;
 	.art {
 		max-width: 115px;
 		max-height: 115px;
-		border-radius: 50%;
 		overflow: hidden;
 		position: absolute;
 		display: none;
+		background: transparent;
+		img {
+			transition: all 0.2s;
+			border-radius: 50%;
+		}
+	}
+	.audio-controls {
+		position: absolute;
+		top: 50%;
+		left: 50%;
+		width: 100%;
+		height: 100%;
+		button {
+			color: white;
+			-webkit-appearance: none;
+			background: rgba(0,0,0,0.2);
+			width: 50%;
+			height: 50%;
+			font-size: 1.5em;
+			display: block;
+			box-sizing: border-box;
+			text-align: center;
+			border: 1px solid #ccc;
+			border-radius: 50%;
+			position: relative;
+			margin: -25% 0 0 -25%;
+		}
+		.pause {
+			display: none;
+		}
+	}
+	&.active {
+		.play {
+			display: none;
+		}
+		.pause {
+			display: block;
+		}
+		.art img {
+			border-radius: 50%;
+			animation: record-spin 5s linear 0s 6;
+		}
+	}
+	&.paused {
+		.play {
+			display: block;
+		}
+		.pause {
+			display: none;
+		}
+		.art img {
+			animation-play-state: paused;
+		}
 	}
 	.info {
 		li {
@@ -123,7 +190,7 @@ $trackTextColor: #ccc;
 			position: absolute;
 			top: 0;
 			left: 0;
-			border-radius: 0;
+			img { border-radius: 0; }
 		}
 		.not-art {
 			display: inline-block;

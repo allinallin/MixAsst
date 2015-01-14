@@ -4,7 +4,6 @@ Web app that displays helpful information on songs fetched from third-party musi
 [MixAsst Website](http://mixasst.callinaryarts.co)
 
 ## TODO
-- Preview track feature
 - Spec confidence indicators
 - Loading indicators
 - Error handling

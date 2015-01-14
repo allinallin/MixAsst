@@ -4,7 +4,8 @@ var app = {
 	debug: false,
 	core: {
 		queryList: {},
-		userList: {}
+		userList: {},
+		activeTrack: []
 	},
 	api: {}
 };
@@ -72,7 +73,40 @@ function viewport() {
 
 	    $(document).on('click', '.action button', addRemoveTrack);
 
+	    $(document).on('click', '.audio-controls', playPauseTrack);
+
 	});
+
+	function playPauseTrack(e) {
+		var $track = $(this).closest('.track');
+		var audio = $track.find('audio').get(0);
+
+		if (app.core.activeTrack.length && app.core.activeTrack[0].src !== audio.src) {
+			app.core.activeTrack[0].pause();
+			app.core.activeTrack[0].currentTime = 0;
+			onTrackEnd.call(app.core.activeTrack[0]);
+		}
+
+		if (audio.paused) {
+			$track.addClass('active').removeClass('paused');
+			audio.play();
+			app.core.activeTrack = [audio];
+		} else {
+			$track.addClass('paused');
+			audio.pause();
+		}
+
+		if (!$track.hasClass('played')) {
+			$(audio).on('ended', onTrackEnd);
+			$track.addClass('played');
+		}
+	}
+
+	function onTrackEnd() {
+		var $track = $(this).closest('.track');
+		$track.removeClass('active paused');
+		app.core.activeTrack = [];
+	}
 
 	function addRemoveTrack() {
     	var trackId = $(this).closest('.track').attr('data-id');
