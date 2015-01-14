@@ -4,7 +4,8 @@ var app = {
 	debug: false,
 	core: {
 		queryList: {},
-		userList: {}
+		userList: {},
+		activeTrack: []
 	},
 	api: {}
 };
@@ -72,7 +73,53 @@ function viewport() {
 
 	    $(document).on('click', '.action button', addRemoveTrack);
 
+	    $(document).on('click', '.audio-controls', playPauseTrack);
+
 	});
+
+	function playPauseTrack(e) {
+		var $track = $(this).closest('.track');
+		var audio = $track.find('audio').get(0);
+
+		if (app.core.activeTrack.length && app.core.activeTrack[0].src !== audio.src) {
+			app.core.activeTrack[0].pause();
+			app.core.activeTrack[0].currentTime = 0;
+			onTrackEnded.call(app.core.activeTrack[0]);
+		}
+
+		$track.addClass('active');
+		app.core.activeTrack = [audio];
+
+		if (!$track.hasClass('init')) {
+			$track.addClass('init loading');
+
+			$(audio).on('playing', onTrackPlaying);
+			$(audio).on('pause', onTrackPause);
+			$(audio).on('ended', onTrackEnded);
+		}
+		
+		if (audio.paused) {
+			audio.play();
+		} else {
+			audio.pause();
+		}
+	}
+
+	function onTrackPlaying() {
+		var $track = $(this).closest('.track');
+		$track.removeClass('loading paused').addClass('playing');
+	}
+
+	function onTrackPause() {
+		var $track = $(this).closest('.track');
+		$track.removeClass('loading playing').addClass('paused');
+	}
+
+	function onTrackEnded() {
+		var $track = $(this).closest('.track');
+		$track.removeClass('active loading playing paused');
+		app.core.activeTrack = [];
+	}
 
 	function addRemoveTrack() {
     	var trackId = $(this).closest('.track').attr('data-id');
