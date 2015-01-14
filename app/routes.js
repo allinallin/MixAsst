@@ -10,7 +10,7 @@
  *  You should use the same approach for your own callbacks.
  *
  */
-module.exports = function(app, request, querystring, Promise, echo) {
+module.exports = function(app, request, querystring, Promise, echo, io) {
     var requestP = Promise.promisify(request);
 
     app.get('/search', function(req, res) {
@@ -18,6 +18,11 @@ module.exports = function(app, request, querystring, Promise, echo) {
             json: [],
             ids: []
         };
+
+        var socketId = req.headers['socket-id'];
+
+        if (socketId)
+            io.sockets.connected[socketId].emit('progress', '1');
 
         var spotifyReqUrl = 'https://api.spotify.com/v1/search?';
 
@@ -46,6 +51,9 @@ module.exports = function(app, request, querystring, Promise, echo) {
                 searchResults.json = addTopLevelToJson(jsonShort, 'uri');
                 searchResults.trackIds = trackIds;
 
+                if (socketId)
+                    io.sockets.connected[socketId].emit('progress', '2');
+
                 return getTrackSpecs(trackIds); // Promise
             })
             // http://developer.echonest.com/docs/v4/song/profile
@@ -64,6 +72,9 @@ module.exports = function(app, request, querystring, Promise, echo) {
                 return mergeIntoResults(jsonShort); // Json
             })
             .then(function(jsonFinal) {
+                if (socketId)
+                    io.sockets.connected[socketId].emit('progress', '3');
+                
                 res.send(jsonFinal);
             })
             .catch(function(err) {

@@ -7,7 +7,10 @@ var echojs = require('echojs');
 var Promise = require("bluebird");
 
 var app = express();
+var server = require('http').Server(app);
+var io = require('socket.io')(server);
 
+// SERVE STATIC FILES
 app.use(express.static(__dirname + '/public')).use(cookieParser());
 
 // USER CONFIG
@@ -17,8 +20,8 @@ var echo = echojs({
 });
 
 // ROUTES
-require('./app/routes.js')(app, request, querystring, Promise, echo);
+require('./app/routes.js')(app, request, querystring, Promise, echo, io);
 
 // BOOT
 console.log('Listening on 7000');
-app.listen(7000);
+server.listen(7000);
