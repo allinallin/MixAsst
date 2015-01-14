@@ -5,32 +5,13 @@ var app = {
 	core: {
 		queryList: {},
 		userList: {},
-		activeTrack: []
+		activeTrack: [],
+		socketId: ''
 	},
 	api: {}
 };
 
 // app.debug = true;
-
-/* Search Query */
-
-app.api.searchQuery = function ( searchValue, callback ) {
-	var url = app.debug ? '/js/fakeQuery.json' : '/search';
-
-	$.ajax({
-		url: url,
-		data: { q: searchValue },
-		headers: {
-			'socket-id': app.core.socketId
-		},
-		success: onSuccess
-    });
-
-	function onSuccess(data) {
-		if (callback && typeof(callback) == 'function')
-			callback(data);
-	} 
-}
 
 /* Helper Functions */
 
@@ -44,12 +25,66 @@ function viewport() {
 };
 
 (function iife(window, document, app, $, store, io) {
-	
+	/* WEBSOCKETS SETUP */
 	var socket = io();
 
 	socket.on('connect', function() {
 		app.core.socketId = socket.io.engine.id;
 	});
+
+	/* USERLIST CACHE */
+	app.core.userList = store.get('mixasst_user_list') || {};
+
+	/* LISTENERS */
+	$(function() {
+    	updateUserListCount();
+		centerSearchBox();
+
+	    $('.search-form').on('submit', onSearchSubmit);
+	    
+		$(document)
+			.on('click', '.user-bar button', renderUserList)
+	    	.on('click', '.action button', addRemoveTrack)
+	    	.on('click', '.audio-controls', playPauseTrack)
+	    	.on('trackListLoaded', onTrackListLoaded);
+
+	});
+
+	/* SEARCH QUERY */
+	function onSearchSubmit(e) {
+		e.preventDefault();
+		var searchVal = $('input').val();
+
+		if (!searchVal) {
+			searchVal = 'firework katy perry';
+			$('input').val(searchVal);
+		}
+
+		moveSearchBox();
+		showLoadingBox();
+		$('.container').attr('data-mode', 'query');
+    	app.api.searchQuery( searchVal, renderQueryList );
+	}
+
+	app.api.searchQuery = function ( searchValue, callback ) {
+		var url = app.debug ? '/js/fakeQuery.json' : '/search';
+
+		$.ajax({
+			url: url,
+			data: { q: searchValue },
+			headers: {
+				'socket-id': app.core.socketId
+			},
+			success: onSuccess
+	    });
+
+		function onSuccess(data) {
+			if (callback && typeof(callback) == 'function')
+				callback(data);
+		} 
+	}
+	
+	/* LOADING BOX */
 
 	socket.on('progress', changeLoadingStage);
 
@@ -57,45 +92,77 @@ function viewport() {
 		var $loadingStages = $('li', '.loading-box');
 		var $nextStage = $loadingStages.eq(stage);
 
-		console.log(parseInt(stage));
-
 		$nextStage.addClass('active').siblings().removeClass('active');
 	}
 
-	app.core.userList = store.get('mixasst_user_list') || {};
+	function showLoadingBox() {
+		$('.list').html('');
+	    animateNodeFromBottom($('.loading-box'));
+	}
 
-	$(function() {
-    	updateUserListCount();
-		centerSearchBox();
+	function hideLoadingBox() {
+		$('.loading-box').removeClass('show');
+		changeLoadingStage(1);
+	}
 
-	    $('.search-form').on('submit', function(e) {
-			e.preventDefault();
-			var searchVal = $('input').val();
-	
-			if (!searchVal) {
-				searchVal = 'firework katy perry';
-				$('input').val(searchVal);
+	/* TRACKLIST RENDERING */
+
+	function updateUserListCount() {
+		var $countNode = $('.count', '.user-bar');
+		var trackCount = Object.keys(app.core.userList).length;
+
+		$countNode.text(trackCount);
+	}
+
+	function renderQueryList( jsonResults ) {
+		var hbsSource = $('#track-list-template').html();
+		var hbsTemplate = Handlebars.compile( hbsSource );
+		var $hbsPlaceholder = $('.list', '.query-list');
+		var userList = app.core.userList;
+
+		$('.container').attr('data-mode', 'query');
+		for (var trackId in userList) {
+			if (userList.hasOwnProperty(trackId) && jsonResults.hasOwnProperty(trackId)) {
+				jsonResults[trackId].onUserList = true;
 			}
-	    	app.api.searchQuery( searchVal, renderQueryList );
-	    });
-	    
-		$(document).on('click', '.user-bar button', renderUserList);
+		}
 
-	    $(document).on('trackListLoaded', function(e) {
-			moveSearchBox();
-	    	animateTracks();
+		hideLoadingBox();
+		$hbsPlaceholder.html( hbsTemplate( jsonResults ) );
+		
+		$.event.trigger({
+			type: 'trackListLoaded',
+			tracks: jsonResults
+		});
 
-	    	for (var track in e.tracks) {
-	    		setBodyBackground( e.tracks[track].album.image_url );
-	    		break;
-	    	}
-	    });
+		app.core.queryList = jsonResults;
+	}
 
-	    $(document).on('click', '.action button', addRemoveTrack);
+	function renderUserList() {
+		var hbsSource = $('#track-list-template').html();
+		var hbsTemplate = Handlebars.compile( hbsSource );
+		var $hbsPlaceholder = $('.list', '.user-list');
 
-	    $(document).on('click', '.audio-controls', playPauseTrack);
+		$('.container').attr('data-mode', 'user');
+		$hbsPlaceholder.html( hbsTemplate( app.core.userList ) );
 
-	});
+		$.event.trigger({
+			type: 'trackListLoaded',
+			tracks: app.core.userList
+		});
+	}
+
+	function onTrackListLoaded(data) {
+		moveSearchBox();
+    	animateNodeFromBottom($('.track'));
+
+    	for (var track in data.tracks) {
+    		setBodyBackground( data.tracks[track].album.image_url );
+    		break;
+    	}
+	}
+
+	/* TRACK ACTIONS */
 
 	function playPauseTrack(e) {
 		var $track = $(this).closest('.track');
@@ -158,66 +225,22 @@ function viewport() {
     	store.set('mixasst_user_list', app.core.userList);
 	}
 
-	function updateUserListCount() {
-		var $countElm = $('.count', '.user-bar');
-		var trackCount = Object.keys(app.core.userList).length;
+	/* UI */
 
-		$countElm.text(trackCount);
-	}
-
-	function renderQueryList( jsonResults ) {
-		var hbsSource = $('#track-list-template').html();
-		var hbsTemplate = Handlebars.compile( hbsSource );
-		var $hbsPlaceholder = $('.list', '.query-list');
-		var userList = app.core.userList;
-
-		$('.container').attr('data-mode', 'query');
-		for (var trackId in userList) {
-			if (userList.hasOwnProperty(trackId) && jsonResults.hasOwnProperty(trackId)) {
-				jsonResults[trackId].onUserList = true;
-			}
-		}
-
-		$hbsPlaceholder.html( hbsTemplate( jsonResults ) );
-		
-		$.event.trigger({
-			type: 'trackListLoaded',
-			tracks: jsonResults
-		});
-
-		app.core.queryList = jsonResults;
-	}
-
-	function renderUserList() {
-		var hbsSource = $('#track-list-template').html();
-		var hbsTemplate = Handlebars.compile( hbsSource );
-		var $hbsPlaceholder = $('.list', '.user-list');
-
-		$('.container').attr('data-mode', 'user');
-		$hbsPlaceholder.html( hbsTemplate( app.core.userList ) );
-
-		$.event.trigger({
-			type: 'trackListLoaded',
-			tracks: app.core.userList
-		});
-	}
-
-	function animateTracks() {
-		var $tracks = $('.track');
-
-		$tracks
+	function animateNodeFromBottom($node) {
+		$node
 			.addClass('no-transition')
 			.removeClass('show')
 			.css({
 				transform: 'translate3d(0,'+viewport().height+'px,0)'
 			});
 		
-		$tracks.height(); // repaint
+		$node.height(); // repaint
 		
-		$tracks
+		$node
 			.removeClass('no-transition')
 			.addClass('show');
-	}
+	}	
 
 	function centerSearchBox() {
 		var $searchBox = $('.search-wrapper');

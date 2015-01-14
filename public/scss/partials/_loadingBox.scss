@@ -1,7 +1,23 @@
 .loading-box {
-	width: 320px;
-	margin: 0 auto;
+	display: none;
+	width: 200px;
+	height: 100px;
+	position: absolute;
+	top: 0;
+	bottom: 0;
+	left: 0;
+	right: 0;
+	margin: auto;
 	text-align: center;
+	background: rgba(37, 34, 34, 0.9);
+    padding: 2em;
+	color: $trackTextColor;
+    box-shadow: 0 0 5px 0 rgba(0,0,0,0.4);
+    transition: transform 0.4s;
+	&.show {
+		display: block;
+    	transform: translate3d(0,0,0)!important;
+	}
 	.fa {
 		font-size: 2em;
 	}
@@ -11,12 +27,12 @@
 		margin-top: 0.5em;
 	}
 	li {
-		color: gray;
 		transition: all 0.2s;
-		transform: scale3d(0.875,0.875,1);
+		transform: scale3d(1,1,1);
+		line-height: 1.4em;
 		&.active {
 			color: white;
-			transform: scale3d(1,1,1);
+			transform: scale3d(1.1,1.1,1);
 		}
 	}
 }
