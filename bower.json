@@ -2,7 +2,6 @@
   "name": "mixasst",
   "private": true,
   "dependencies": {
-    "normalize.css": "~3.0.2",
     "store-js": "~1.3.17"
   },
   "devDependencies": {}
