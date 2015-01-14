@@ -20,6 +20,9 @@ app.api.searchQuery = function ( searchValue, callback ) {
 	$.ajax({
 		url: url,
 		data: { q: searchValue },
+		headers: {
+			'socket-id': app.core.socketId
+		},
 		success: onSuccess
     });
 
@@ -40,7 +43,24 @@ function viewport() {
     };
 };
 
-(function iife(window, document, app, $, store) {
+(function iife(window, document, app, $, store, io) {
+	
+	var socket = io();
+
+	socket.on('connect', function() {
+		app.core.socketId = socket.io.engine.id;
+	});
+
+	socket.on('progress', changeLoadingStage);
+
+	function changeLoadingStage(stage) {
+		var $loadingStages = $('li', '.loading-box');
+		var $nextStage = $loadingStages.eq(stage);
+
+		console.log(parseInt(stage));
+
+		$nextStage.addClass('active').siblings().removeClass('active');
+	}
 
 	app.core.userList = store.get('mixasst_user_list') || {};
 
@@ -232,4 +252,4 @@ function viewport() {
 
 		$img[0].src = imageUrl;
 	}
-})(window, document, app, jQuery, store);
+})(window, document, app, jQuery, store, io);
