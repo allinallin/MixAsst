@@ -10,19 +10,18 @@
  *  You should use the same approach for your own callbacks.
  *
  */
-module.exports = function(app, request, querystring, Promise, echo, io) {
+module.exports = function(app, request, querystring, Promise, echo, io, _) {
     var requestP = Promise.promisify(request);
 
     app.get('/search', function(req, res) {
         var searchResults = {
-            json: [],
-            ids: []
+            json: {},
+            trackIds: []
         };
 
         var socketId = req.headers['socket-id'];
 
-        if (socketId)
-            io.sockets.connected[socketId].emit('progress', '1');
+        updateQueryProgress(0);
 
         var spotifyReqUrl = 'https://api.spotify.com/v1/search?';
 
@@ -31,7 +30,7 @@ module.exports = function(app, request, querystring, Promise, echo, io) {
             type: 'track',
             limit: 7
         });
-        
+
         // https://api.spotify.com/v1/search
         requestP(spotifyReqUrl)
             .spread(function(response, body) {
@@ -44,17 +43,13 @@ module.exports = function(app, request, querystring, Promise, echo, io) {
 
                 var jsonFull = JSON.parse(body).tracks.items;
                 var jsonShort = condenseSpotifyJSON(jsonFull);
-                var trackIds = jsonShort.map(function( track ) {
-                    return track.uri;
-                });
 
                 searchResults.json = addTopLevelToJson(jsonShort, 'uri');
-                searchResults.trackIds = trackIds;
+                searchResults.trackIds = _.pluck(jsonShort, 'uri');
 
-                if (socketId)
-                    io.sockets.connected[socketId].emit('progress', '2');
+                updateQueryProgress(1);
 
-                return getTrackSpecs(trackIds); // Promise
+                return getTrackSpecs(searchResults.trackIds); // Promise
             })
             // http://developer.echonest.com/docs/v4/song/profile
             .then(function(contents) {
@@ -72,19 +67,18 @@ module.exports = function(app, request, querystring, Promise, echo, io) {
                 return mergeIntoResults(jsonShort); // Json
             })
             .then(function(jsonFinal) {
-                if (socketId)
-                    io.sockets.connected[socketId].emit('progress', '3');
-                
+                updateQueryProgress(2);
                 res.send(jsonFinal);
             })
             .catch(function(err) {
                 console.log(err);
+                res.send(err);
             });
 
         function addTopLevelToJson(targetJson, targetKey) {
             var newObj = {};
 
-            for (var i = 0; i < targetJson.length; i++) {
+            for (var i = 0, len = targetJson.length; i < len; i++) {
                 var targetValue = targetJson[i][targetKey];
                 if (!newObj.hasOwnProperty(targetValue)) {
                     newObj[targetValue] = targetJson[i];
@@ -109,6 +103,11 @@ module.exports = function(app, request, querystring, Promise, echo, io) {
             });
         }
         
+        function updateQueryProgress(msg) {
+            if (!socketId) return;
+            io.sockets.connected[socketId].emit('progress', msg);
+        }
+        
         function ClientError(e) {
             return e.code >= 400 && e.code < 500;
         }
@@ -122,44 +121,33 @@ module.exports = function(app, request, querystring, Promise, echo, io) {
         }
 
         function condenseSpotifyJSON(jsonFull) {
-            var jsonTrimmed = [];
-
-            for (var i = 0; i < jsonFull.length; i++) {
-                var singleTrack = jsonFull[i];
-                var info = {
-                    uri: singleTrack.uri,
-                    name: singleTrack.name,
+            return _.map(jsonFull, function(track) {
+                return {
+                    uri: track.uri,
+                    name: track.name,
                     album: {
-                        image_url: singleTrack.album.images[1].url,
-                        name: singleTrack.album.name
+                        image_url: track.album.images[1].url,
+                        name: track.album.name
                     },
-                    artist: singleTrack.artists.map(function(artist) {
-                        return artist.name
-                    }).join(', '),
-                    preview_url: singleTrack.preview_url
+                    artist: _.pluck(track.artists, 'name').join(', '),
+                    preview_url: track.preview_url
                 };
-                jsonTrimmed.push(info);
-            };
-
-            return jsonTrimmed;
+            });
         }
 
         function condenseEchonestJSON(jsonFull, trackIds) {
-            var jsonTrimmed = [];
-            for (var i = 0; i < jsonFull.length; i++) {
-                var singleTrack = jsonFull[i];
-                var info = {
-                    name: singleTrack.title,
-                    key: singleTrack.audio_summary.key,
-                    mode: singleTrack.audio_summary.mode,
-                    tempo: singleTrack.audio_summary.tempo
+            return _.map(jsonFull, function(track) {
+                var trackBuckets = _.groupBy(track.tracks, 'catalog');
+                return {
+                //    name: track.title,
+                    key: track.audio_summary.key,
+                    mode: track.audio_summary.mode,
+                    tempo: track.audio_summary.tempo,
+                    tonicFriendly: getTonicFriendly(track.audio_summary.key, track.audio_summary.mode),
+                    whosampledUrl: getWhosampledUrl(trackBuckets),
+                    uriAliases: getSpotifyIds(trackBuckets, trackIds)
                 };
-                info.tonicFriendly = getTonicFriendly(info.key, info.mode);
-                info.whosampledUrl = getWhosampledUrl(singleTrack.tracks);
-                info.spotifyId = getSpotifyId(singleTrack.tracks, trackIds);
-                jsonTrimmed.push(info);
-            };
-            return jsonTrimmed;
+            });
         }
 
         function getTonicFriendly(key, mode) {
@@ -183,57 +171,38 @@ module.exports = function(app, request, querystring, Promise, echo, io) {
                     1: 'Major'
                 }
             };
-            var tonicFriendly = defs.keys[key] + ' ' + defs.modes[mode];
-            return tonicFriendly;
+            return defs.keys[key] + ' ' + defs.modes[mode];
         }
 
-        function getWhosampledUrl(sampleInfo) {
-            if (!sampleInfo) return null;
-
-            var url, base = 'http://www.whosampled.com/track/view/';            
-
-            for (var i = 0; i < sampleInfo.length; i++) {
-                if (sampleInfo[i].catalog == 'whosampled') {
-                    // get track # from value: whosampled:track:#
-                    url = base + sampleInfo[i].foreign_id.split(':')[2];
-                }
-            };
-            
-            return url;
+        function getWhosampledUrl(buckets) {
+            if (!buckets.whosampled) return null;
+            var baseUrl = 'http://www.whosampled.com/track/view/';            
+            return baseUrl + buckets.whosampled.foreign_id.split(':')[2];
         }
 
-        function getSpotifyId(idInfo, trackIds) {
-            if (!idInfo) return null;
-
-            var ids = [];
-            
-            for (var i = 0; i < idInfo.length; i++) {
-                if (idInfo[i].catalog == 'spotify') {
-                    if (trackIds.indexOf( idInfo[i].foreign_id ) != -1)
-                        ids.push( idInfo[i].foreign_id );
-                }
-            };
-            
-            return ids;
+        function getSpotifyIds(buckets, trackIds) {
+            if (!buckets.spotify) return null;
+            return _.map(buckets.spotify, function(item) {
+                if (trackIds.indexOf( item.foreign_id ) !== -1)
+                    return item.foreign_id
+            });
         }
 
         function mergeIntoResults(specResults) {
             var mainResults = searchResults.json;
+            var i, ilen = specResults.length;
 
-            for (var i = 0; i < specResults.length; i++) {
-                var singleSpec = specResults[i];
-                var singleSpecId = singleSpec.spotifyId;
+            for (i = 0; i < ilen; i++) {
+                var track = specResults[i];
+                var j, jlen = track.uriAliases.length;
 
-                for (var j = 0; j < singleSpecId.length; j++) {
-                    if (mainResults.hasOwnProperty(singleSpecId[j])) {
-                        var matchedResult = mainResults[singleSpecId[j]];
-                        matchedResult.key = singleSpec.key;
-                        matchedResult.mode = singleSpec.mode;
-                        matchedResult.tempo = singleSpec.tempo;
-                        matchedResult.tonicFriendly = singleSpec.tonicFriendly;
-                        matchedResult.whosampledUrl = singleSpec.whosampledUrl;
+                for (var j = 0; j < jlen; j++) {
+                    var uri = track.uriAliases[j];
+                    if (mainResults.hasOwnProperty(uri)) {
+                        _.extend(mainResults[uri], track);
                     }
                 };
+
             };
 
             return mainResults;
