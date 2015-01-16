@@ -11,9 +11,15 @@ var app = {
 	api: {}
 };
 
-// app.debug = true;
-
 /* Helper Functions */
+
+(function injectLivereload(window, document) {
+	if (!location.host.indexOf('localhost') > -1 && !location.host.indexOf('127.0.0.1') > -1) {
+		document.write('<script src="http://'
+		+ window.location.hostname
+		+ ':35729/livereload.js?snipver=1"><\/script>')
+	}
+})(window, document);
 
 function viewport() {
     // workaround for http://bugs.jquery.com/ticket/6724
@@ -23,6 +29,8 @@ function viewport() {
         height: window.innerHeight ? window.innerHeight : $(window).height()
     };
 };
+
+/* Real functions */
 
 (function iife(window, document, app, $, store, io) {
 	/* WEBSOCKETS SETUP */
@@ -67,7 +75,7 @@ function viewport() {
 	}
 
 	app.api.searchQuery = function ( searchValue, callback ) {
-		var url = app.debug ? '/js/fakeQuery.json' : '/search';
+		var url = app.debug ? '/js/fakeQueryResponse.json' : '/search';
 
 		$.ajax({
 			url: url,

@@ -1,6 +1,13 @@
+# Dist
+dist
+
 # Private Files
 userConfig.js
 design
+
+# grunt build
+.tmp/
+*.log
 
 # Sass
 .sass-cache
