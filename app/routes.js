@@ -15,7 +15,7 @@ module.exports = function(app, request, querystring, Promise, echo, io, _) {
 
     app.get('/search', function(req, res) {
         var searchResults = {
-            json: [],
+            json: {},
             trackIds: []
         };
 
@@ -78,7 +78,7 @@ module.exports = function(app, request, querystring, Promise, echo, io, _) {
         function addTopLevelToJson(targetJson, targetKey) {
             var newObj = {};
 
-            for (var i = 0; i < targetJson.length; i++) {
+            for (var i = 0, len = targetJson.length; i < len; i++) {
                 var targetValue = targetJson[i][targetKey];
                 if (!newObj.hasOwnProperty(targetValue)) {
                     newObj[targetValue] = targetJson[i];
@@ -190,16 +190,19 @@ module.exports = function(app, request, querystring, Promise, echo, io, _) {
 
         function mergeIntoResults(specResults) {
             var mainResults = searchResults.json;
+            var i, ilen = specResults.length;
 
-            for (var i = 0; i < specResults.length; i++) {
+            for (i = 0; i < ilen; i++) {
                 var track = specResults[i];
+                var j, jlen = track.uriAliases.length;
 
-                for (var j = 0; j < track.uriAliases.length; j++) {
+                for (var j = 0; j < jlen; j++) {
                     var uri = track.uriAliases[j];
                     if (mainResults.hasOwnProperty(uri)) {
                         _.extend(mainResults[uri], track);
                     }
                 };
+
             };
 
             return mainResults;
