@@ -26,7 +26,7 @@ function viewport() {
 
 (function iife(window, document, app, $, store, io) {
 	/* WEBSOCKETS SETUP */
-	var socket = io();
+	var socket = io.connect(location.origin);
 
 	socket.on('connect', function() {
 		app.core.socketId = socket.io.engine.id;
