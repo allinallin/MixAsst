@@ -201,7 +201,7 @@ module.exports = function(app, request, querystring, Promise, echo, io, _) {
                     var uri = track.uriAliases[j];
                     if (mainResults.hasOwnProperty(uri)) {
                         _.extend(mainResults[uri], track);
-                        delete mainResults[uri];
+                        delete mainResults[uri].uriAliases;
                     }
                 };
 
