@@ -19,10 +19,10 @@ module.exports = function(app, request, querystring, Promise, echo, io, _) {
             trackIds: []
         };
 
+        var queryId = parseInt(req.headers['query-id']);
         var socketId = req.headers['socket-id'];
 
         var spotifyReqUrl = 'https://api.spotify.com/v1/search?';
-
         spotifyReqUrl += querystring.stringify({
             q: req.query.q,
             type: 'track',
@@ -106,7 +106,7 @@ module.exports = function(app, request, querystring, Promise, echo, io, _) {
         
         function updateQueryProgress(msg) {
             if (!socketId) return;
-            io.sockets.connected[socketId].emit('progress', msg);
+            io.sockets.connected[socketId].emit('progress', {queryId: queryId, stage: msg});
         }
         
         function ClientError(e) {

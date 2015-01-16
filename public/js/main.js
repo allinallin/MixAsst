@@ -5,6 +5,10 @@ var app = {
 	core: {
 		queryList: {},
 		userList: {},
+		activeQuery: {
+			id: 0,
+			ajax: null
+		},
 		activeTrack: [],
 		socketId: ''
 	},
@@ -69,18 +73,23 @@ function viewport() {
 		}
 
 		moveSearchBox();
+		endActiveQuery();
 		showLoadingBox();
+
 		$('.container').attr('data-mode', 'query');
     	app.api.searchQuery( searchVal, renderQueryList );
 	}
 
 	app.api.searchQuery = function ( searchValue, callback ) {
 		var url = app.debug ? '/js/fakeQueryResponse.json' : '/search';
-
-		$.ajax({
+		
+		++app.core.activeQuery.id;
+		
+		app.core.activeQuery.ajax = $.ajax({
 			url: url,
 			data: { q: searchValue },
 			headers: {
+				'query-id': app.core.activeQuery.id,
 				'socket-id': app.core.socketId
 			},
 			success: onSuccess
@@ -91,14 +100,24 @@ function viewport() {
 				callback(data);
 		} 
 	}
+
+	function endActiveQuery() {
+		if (!app.core.activeQuery.ajax) return;
+		
+		app.core.activeQuery.ajax.abort();
+		app.core.activeQuery.ajax = null;
+		hideLoadingBox();
+	}
 	
 	/* LOADING BOX */
 
 	socket.on('progress', changeLoadingStage);
 
-	function changeLoadingStage(stage) {
+	function changeLoadingStage(data) {
+		if (data.queryId !== app.core.activeQuery.id) return;
+
 		var $loadingStages = $('li', '.loading-box');
-		var $nextStage = $loadingStages.eq(stage);
+		var $nextStage = $loadingStages.eq(data.stage);
 
 		$nextStage.addClass('active').siblings().removeClass('active');
 	}
@@ -110,7 +129,7 @@ function viewport() {
 
 	function hideLoadingBox() {
 		$('.loading-box').removeClass('show');
-		changeLoadingStage(1);
+		changeLoadingStage({queryId: app.core.activeQuery.id, stage: 0});
 	}
 
 	/* TRACKLIST RENDERING */
@@ -150,6 +169,8 @@ function viewport() {
 		var hbsSource = $('#track-list-template').html();
 		var hbsTemplate = Handlebars.compile( hbsSource );
 		var $hbsPlaceholder = $('.list', '.user-list');
+
+		endActiveQuery();
 
 		$('.container').attr('data-mode', 'user');
 		$hbsPlaceholder.html( hbsTemplate( app.core.userList ) );
