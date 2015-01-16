@@ -45,7 +45,7 @@ module.exports = function(app, request, querystring, Promise, echo, io, _) {
                 var jsonShort = condenseSpotifyJSON(jsonFull);
 
                 searchResults.json = addTopLevelToJson(jsonShort, 'uri');
-                searchResults.trackIds = _.pluck(jsonShort, 'uri');
+                searchResults.trackIds = Object.keys(searchResults.json);
 
                 updateQueryProgress(1);
 
@@ -82,6 +82,7 @@ module.exports = function(app, request, querystring, Promise, echo, io, _) {
                 var targetValue = targetJson[i][targetKey];
                 if (!newObj.hasOwnProperty(targetValue)) {
                     newObj[targetValue] = targetJson[i];
+                    delete newObj[targetValue].uri;
                 }
             };
 
@@ -140,11 +141,11 @@ module.exports = function(app, request, querystring, Promise, echo, io, _) {
                 var trackBuckets = _.groupBy(track.tracks, 'catalog');
                 return {
                 //    name: track.title,
-                    key: track.audio_summary.key,
-                    mode: track.audio_summary.mode,
-                    tempo: track.audio_summary.tempo,
-                //    analysisUrl: track.audio_summary.analysis_url,
+                //    key: track.audio_summary.key,
+                //    mode: track.audio_summary.mode,
+                    analysisUrl: track.audio_summary.analysis_url,
                     tonicFriendly: getTonicFriendly(track.audio_summary.key, track.audio_summary.mode),
+                    tempo: track.audio_summary.tempo,
                     whosampledUrl: getWhosampledUrl(trackBuckets),
                     uriAliases: getSpotifyIds(trackBuckets, trackIds)
                 };
@@ -176,13 +177,13 @@ module.exports = function(app, request, querystring, Promise, echo, io, _) {
         }
 
         function getWhosampledUrl(buckets) {
-            if (!buckets.whosampled) return null;
+            if (!buckets.whosampled) return;
             var baseUrl = 'http://www.whosampled.com/track/view/';            
             return baseUrl + buckets.whosampled.foreign_id.split(':')[2];
         }
 
         function getSpotifyIds(buckets, trackIds) {
-            if (!buckets.spotify) return null;
+            if (!buckets.spotify) return;
             return _.map(buckets.spotify, function(item) {
                 if (trackIds.indexOf( item.foreign_id ) !== -1)
                     return item.foreign_id

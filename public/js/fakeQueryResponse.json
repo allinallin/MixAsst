@@ -1,6 +1,5 @@
 {
     "spotify:track:1T7Htpf1kEvU9Adf8J0ekk": {
-        "uri": "spotify:track:1T7Htpf1kEvU9Adf8J0ekk",
         "name": "Break Free",
         "album": {
             "image_url": "https://i.scdn.co/image/c1018d80d0471cbc7cab366b23d3b9df5938d696",
@@ -8,13 +7,11 @@
         },
         "artist": "Ariana Grande, Zedd",
         "preview_url": "https://p.scdn.co/mp3-preview/c885f67da10b0b95fef8987c46509ff2de9a8ebd",
-        "key": 7,
-        "mode": 0,
-        "tempo": 129.96,
-        "tonicFriendly": "G Minor"
+        "analysisUrl": "http://echonest-analysis.s3.amazonaws.com/TR/jfHZeAkJw0me3GFGm8ynj1O0Dk85Ymey6cbDw4j0fCc9jXKoTq2WA0hQSbBMxiyZvvtVkr9xqABJnS2_8%3D/3/full.json?AWSAccessKeyId=AKIAJRDFEY23UEVW42BQ&Expires=1421446388&Signature=NiEhFQajxcYiVercchpHTF%2BM6vI%3D",
+        "tonicFriendly": "G Minor",
+        "tempo": 129.96
     },
     "spotify:track:1aKsg5b9sOngINaQXbB0P7": {
-        "uri": "spotify:track:1aKsg5b9sOngINaQXbB0P7",
         "name": "Love Me Harder",
         "album": {
             "image_url": "https://i.scdn.co/image/c1018d80d0471cbc7cab366b23d3b9df5938d696",
@@ -22,13 +19,11 @@
         },
         "artist": "Ariana Grande, The Weeknd",
         "preview_url": "https://p.scdn.co/mp3-preview/7fc7e126aa2619fa79bc101bb1c73d47e67c22fc",
-        "key": 1,
-        "mode": 0,
-        "tempo": 99.093,
-        "tonicFriendly": "C# Minor"
+        "analysisUrl": "http://echonest-analysis.s3.amazonaws.com/TR/Boi3SAFwIoxKUfFzlX-csjAc7J_ccnrg--vCS0uRciXZc_vRtYImSU3GiGcq32c9blA6NanXRxJQQTMCM%3D/3/full.json?AWSAccessKeyId=AKIAJRDFEY23UEVW42BQ&Expires=1421446388&Signature=LiB94WT73yL2MEMOd9q1ry1dSRs%3D",
+        "tonicFriendly": "C# Minor",
+        "tempo": 99.093
     },
     "spotify:track:1ADjWm8QNhgNV8yCNNgQ1T": {
-        "uri": "spotify:track:1ADjWm8QNhgNV8yCNNgQ1T",
         "name": "Santa Tell Me",
         "album": {
             "image_url": "https://i.scdn.co/image/f9e00b782bb18af56246b70d017f5a8db8c5e30d",
@@ -36,13 +31,11 @@
         },
         "artist": "Ariana Grande",
         "preview_url": "https://p.scdn.co/mp3-preview/41866ff0f4c402da2614ebdb866d96e352c2618e",
-        "key": 7,
-        "mode": 1,
-        "tempo": 96.012,
-        "tonicFriendly": "G Major"
+        "analysisUrl": "http://echonest-analysis.s3.amazonaws.com/TR/8Qk27AvQS9gIAuDB0L3HPMp1lniF4tRgfLrFcuFFZoSI_-Yo5dTRIWUtyLjuHptlqS8ZRVK8xfoChKd1Y%3D/3/full.json?AWSAccessKeyId=AKIAJRDFEY23UEVW42BQ&Expires=1421446388&Signature=NbczR6TeTbnIr7VQzvhEoLVlLC4%3D",
+        "tonicFriendly": "G Major",
+        "tempo": 96.012
     },
     "spotify:track:6xCNYRfzZtoQRo1xruPmNq": {
-        "uri": "spotify:track:6xCNYRfzZtoQRo1xruPmNq",
         "name": "Problem",
         "album": {
             "image_url": "https://i.scdn.co/image/c1018d80d0471cbc7cab366b23d3b9df5938d696",
@@ -50,13 +43,11 @@
         },
         "artist": "Ariana Grande, Iggy Azalea",
         "preview_url": "https://p.scdn.co/mp3-preview/2be045d53c050d25ae647f0c3ef7ed1644ab8852",
-        "key": 1,
-        "mode": 0,
-        "tempo": 103.021,
-        "tonicFriendly": "C# Minor"
+        "analysisUrl": "http://echonest-analysis.s3.amazonaws.com/TR/Dgg0cQ5N-1qFJgzrZeuFG3wZyIT373ZzK47i-bM_HTh6ZYWDxsvBPyoBzu9Sh6yDRFPqDFZZ4RSpcV16E%3D/3/full.json?AWSAccessKeyId=AKIAJRDFEY23UEVW42BQ&Expires=1421446388&Signature=5j/cclQfNyB/EOWIcNl7mxlJ7Mo%3D",
+        "tonicFriendly": "C# Minor",
+        "tempo": 103.021
     },
     "spotify:track:3SaIsrEzrQGDcG1jCeaK8q": {
-        "uri": "spotify:track:3SaIsrEzrQGDcG1jCeaK8q",
         "name": "Bang Bang",
         "album": {
             "image_url": "https://i.scdn.co/image/ae67edd58e83911d029e54458ae9d9f58522cbe0",
@@ -64,13 +55,11 @@
         },
         "artist": "Jessie J, Ariana Grande, Nicki Minaj",
         "preview_url": "https://p.scdn.co/mp3-preview/5837102a56e73941e5cb3322f0df91fefb6ed02c",
-        "key": 0,
-        "mode": 0,
-        "tempo": 150.02,
-        "tonicFriendly": "C Minor"
+        "analysisUrl": "http://echonest-analysis.s3.amazonaws.com/TR/nKhe4QkdJwNz1xdSlCV-0UwbEtTsLvjB5OrRipq-K1h6JSrrNxozjfTDu8Ec_oMtbvVuZxLnjhCKmuoYQ%3D/3/full.json?AWSAccessKeyId=AKIAJRDFEY23UEVW42BQ&Expires=1421446388&Signature=Da0DnkEbKR5QMREYbkq2Vm3Ih5Y%3D",
+        "tonicFriendly": "C Minor",
+        "tempo": 150.02
     },
     "spotify:track:6EF9SuEEFvCrVyV98enq5v": {
-        "uri": "spotify:track:6EF9SuEEFvCrVyV98enq5v",
         "name": "Just A Little Bit Of Your Heart",
         "album": {
             "image_url": "https://i.scdn.co/image/c1018d80d0471cbc7cab366b23d3b9df5938d696",
@@ -78,13 +67,11 @@
         },
         "artist": "Ariana Grande",
         "preview_url": "https://p.scdn.co/mp3-preview/f40b9076d6b98d9c93faa57df46f07009a631de8",
-        "key": 9,
-        "mode": 1,
-        "tempo": 78.459,
-        "tonicFriendly": "A Major"
+        "analysisUrl": "http://echonest-analysis.s3.amazonaws.com/TR/QlRRHwWU3_deSiJt1is4jlH6o_f-n0d0mGJK3L7kJtwh7WBcQGxdgJysXAn21F9q7mlfaQSyWjSkfGCDI%3D/3/full.json?AWSAccessKeyId=AKIAJRDFEY23UEVW42BQ&Expires=1421446388&Signature=kkGWfZ90OVHwLnWJjTXqEQiues4%3D",
+        "tonicFriendly": "A Major",
+        "tempo": 78.459
     },
     "spotify:track:5bjWdBx64POBYiUny759hy": {
-        "uri": "spotify:track:5bjWdBx64POBYiUny759hy",
         "name": "Last Christmas",
         "album": {
             "image_url": "https://i.scdn.co/image/ffe82d944178c1cf4eb86f7778add79eba82c6e1",
@@ -92,9 +79,8 @@
         },
         "artist": "Ariana Grande",
         "preview_url": "https://p.scdn.co/mp3-preview/7c7c47fbb3aafeead95cdd056de8dc814b600a24",
-        "key": 7,
-        "mode": 1,
-        "tempo": 102.967,
-        "tonicFriendly": "G Major"
+        "analysisUrl": "http://echonest-analysis.s3.amazonaws.com/TR/KMFFngxQRPd76dw-LJUWZGhvrJzE7RHMqgkdWlX4uokFhhmtYZGGc8UkiXEJLyN1vazPxupwUp9hKyjBw%3D/3/full.json?AWSAccessKeyId=AKIAJRDFEY23UEVW42BQ&Expires=1421446388&Signature=W87jM0TeJp6h58QaLnumpCvYX1c%3D",
+        "tonicFriendly": "G Major",
+        "tempo": 102.967
     }
 }

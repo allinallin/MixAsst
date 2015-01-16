@@ -45,7 +45,7 @@
 	
 	<script id="track-list-template" type="text/x-handlebars-template">
 		{{#each this}}
-		<div class="track" data-id="{{uri}}">
+		<div class="track" data-id="{{@key}}">
 			<div class="art">
 				<img src="{{album.image_url}}">
 				<div class="audio-controls">
