@@ -10,7 +10,7 @@
  *  You should use the same approach for your own callbacks.
  *
  */
-module.exports = function(app, request, querystring, Promise, echo, io) {
+module.exports = function(app, request, querystring, Promise, echo, io, _) {
     var requestP = Promise.promisify(request);
 
     app.get('/search', function(req, res) {
@@ -44,7 +44,7 @@ module.exports = function(app, request, querystring, Promise, echo, io) {
 
                 var jsonFull = JSON.parse(body).tracks.items;
                 var jsonShort = condenseSpotifyJSON(jsonFull);
-                var trackIds = jsonShort.map(function( track ) {
+                var trackIds = _.map(jsonShort, function( track ) {
                     return track.uri;
                 });
 
@@ -122,44 +122,34 @@ module.exports = function(app, request, querystring, Promise, echo, io) {
         }
 
         function condenseSpotifyJSON(jsonFull) {
-            var jsonTrimmed = [];
-
-            for (var i = 0; i < jsonFull.length; i++) {
-                var singleTrack = jsonFull[i];
-                var info = {
-                    uri: singleTrack.uri,
-                    name: singleTrack.name,
+            return _.map(jsonFull, function(item) {
+                return {
+                    uri: item.uri,
+                    name: item.name,
                     album: {
-                        image_url: singleTrack.album.images[1].url,
-                        name: singleTrack.album.name
+                        image_url: item.album.images[1].url,
+                        name: item.album.name
                     },
-                    artist: singleTrack.artists.map(function(artist) {
+                    artist: _.map(item.artists, function(artist) {
                         return artist.name
                     }).join(', '),
-                    preview_url: singleTrack.preview_url
+                    preview_url: item.preview_url
                 };
-                jsonTrimmed.push(info);
-            };
-
-            return jsonTrimmed;
+            });
         }
 
         function condenseEchonestJSON(jsonFull, trackIds) {
-            var jsonTrimmed = [];
-            for (var i = 0; i < jsonFull.length; i++) {
-                var singleTrack = jsonFull[i];
-                var info = {
-                    name: singleTrack.title,
-                    key: singleTrack.audio_summary.key,
-                    mode: singleTrack.audio_summary.mode,
-                    tempo: singleTrack.audio_summary.tempo
+            return _.map(jsonFull, function(item) {
+                return {
+                    name: item.title,
+                    key: item.audio_summary.key,
+                    mode: item.audio_summary.mode,
+                    tempo: item.audio_summary.tempo,
+                    tonicFriendly: getTonicFriendly(item.audio_summary.key, item.audio_summary.mode),
+                    whosampledUrl: getWhosampledUrl(item.tracks),
+                    spotifyId: getSpotifyId(item.tracks, trackIds)
                 };
-                info.tonicFriendly = getTonicFriendly(info.key, info.mode);
-                info.whosampledUrl = getWhosampledUrl(singleTrack.tracks);
-                info.spotifyId = getSpotifyId(singleTrack.tracks, trackIds);
-                jsonTrimmed.push(info);
-            };
-            return jsonTrimmed;
+            });
         }
 
         function getTonicFriendly(key, mode) {
