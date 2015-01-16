@@ -21,8 +21,6 @@ module.exports = function(app, request, querystring, Promise, echo, io, _) {
 
         var socketId = req.headers['socket-id'];
 
-        updateQueryProgress(0);
-
         var spotifyReqUrl = 'https://api.spotify.com/v1/search?';
 
         spotifyReqUrl += querystring.stringify({
@@ -30,6 +28,8 @@ module.exports = function(app, request, querystring, Promise, echo, io, _) {
             type: 'track',
             limit: 7
         });
+        
+        updateQueryProgress(0);
 
         // https://api.spotify.com/v1/search
         requestP(spotifyReqUrl)
@@ -143,6 +143,7 @@ module.exports = function(app, request, querystring, Promise, echo, io, _) {
                     key: track.audio_summary.key,
                     mode: track.audio_summary.mode,
                     tempo: track.audio_summary.tempo,
+                //    analysisUrl: track.audio_summary.analysis_url,
                     tonicFriendly: getTonicFriendly(track.audio_summary.key, track.audio_summary.mode),
                     whosampledUrl: getWhosampledUrl(trackBuckets),
                     uriAliases: getSpotifyIds(trackBuckets, trackIds)
@@ -200,6 +201,7 @@ module.exports = function(app, request, querystring, Promise, echo, io, _) {
                     var uri = track.uriAliases[j];
                     if (mainResults.hasOwnProperty(uri)) {
                         _.extend(mainResults[uri], track);
+                        delete mainResults[uri];
                     }
                 };
 
