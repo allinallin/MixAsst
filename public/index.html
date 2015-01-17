@@ -12,7 +12,7 @@
 </head>
 <body>
 	<div class="body-bg"></div>
-	<div class="container" data-mode="query">
+	<div class="container">
 		<div class="search-wrapper">
 			<!-- <h1>MixAsst</h1> -->
 			<p>search for a song</p>
@@ -41,15 +41,17 @@
 		<button>
 			My List (<span class="count">0</span>)
 		</button>
+		<span class="msg added">Track Added!</span>
+		<span class="msg removed">Track Removed!</span>
 	</div>
 	
 	<script id="track-list-template" type="text/x-handlebars-template">
 		{{#each this}}
 		<div class="track" data-id="{{@key}}">
 			<div class="art">
-				<img src="{{album.image_url}}">
+				<img src="{{album.imageUrl}}">
 				<div class="audio-controls">
-					<audio src="{{preview_url}}" preload="none"></audio>
+					<audio src="{{previewUrl}}" preload="none"></audio>
 					<button class="play">
 						<i class="fa fa-play"></i>
 					</button>
@@ -103,7 +105,8 @@
 	<script src="//cdnjs.cloudflare.com/ajax/libs/handlebars.js/2.0.0-alpha.1/handlebars.min.js"></script>
 	<script src="//cdn.socket.io/socket.io-1.2.1.js"></script>
 	<!-- build:js js/scripts.js -->
-	<script src="bower_components/store-js/store.min.js"></script>
+	<script src="bower_components/store-js/store.js"></script>
+	<script src="js/lodash.build.js"></script>
 	<script src="js/main.js"></script>
     <!-- endbuild -->
 </body>

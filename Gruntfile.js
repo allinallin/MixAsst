@@ -105,6 +105,18 @@ module.exports = function(grunt) {
                 dest: '<%= config.app %>/css'
             },
         },
+        lodash: {
+            build: {
+                dest: '<%= config.app %>/js/lodash.build.js',
+                options: {
+                    include: [
+                        'debounce',
+                        'throttle'
+                    ],
+                    flags: ['--debug']
+                }
+            }
+        },
         rev: {
             dist: {
                 files: {

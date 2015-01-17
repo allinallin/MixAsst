@@ -37,7 +37,7 @@ function viewport() {
 
 /* Real functions */
 
-(function iife(window, document, app, $, store, io) {
+(function iife(window, document, app, $, _, store, io) {
 	/* WEBSOCKETS SETUP */
 	var socket = io.connect(location.origin);
 
@@ -48,13 +48,18 @@ function viewport() {
 	/* USERLIST CACHE */
 	app.core.userList = store.get('mixasst_user_list') || {};
 
+	/* RESIZE EVENT SETUP */
+	var throttleCenterSearchBox = _.throttle(centerSearchBox, 250);
+
 	/* LISTENERS */
 	$(function() {
     	updateUserListCount();
 		centerSearchBox();
 
 	    $('.search-form').on('submit', onSearchSubmit);
-	    
+
+	   	$(window)
+	   		.on('resize', throttleCenterSearchBox);
 		$(document)
 			.on('click', '.user-bar button', renderUserList)
 	    	.on('click', '.action button', addRemoveTrack)
@@ -66,12 +71,15 @@ function viewport() {
 	/* SEARCH QUERY */
 	function onSearchSubmit(e) {
 		e.preventDefault();
-		var searchVal = $('input').val();
+		var $input = $('input', this);
+		var searchVal = $input.val();
 
 		if (!searchVal) {
 			searchVal = 'firework katy perry';
-			$('input').val(searchVal);
+			$input.val(searchVal);
 		}
+
+		$input.blur();
 
 		moveSearchBox();
 		endActiveQuery();
@@ -187,7 +195,7 @@ function viewport() {
     	animateNodeFromBottom($('.track'));
 
     	for (var track in data.tracks) {
-    		setBodyBackground( data.tracks[track].album.image_url );
+    		setBodyBackground( data.tracks[track].album.imageUrl );
     		break;
     	}
 	}
@@ -238,17 +246,33 @@ function viewport() {
 		app.core.activeTrack = [];
 	}
 
+	var userBarTimeout = null;
+
 	function addRemoveTrack() {
     	var trackId = $(this).closest('.track').attr('data-id');
+    	var $userBar = $('.user-bar');
+
+		if (userBarTimeout)
+			clearTimeout(userBarTimeout);
+
+		$userBar
+			.removeClass('track-added track-removed')
+			.height();
 
     	if (app.core.userList.hasOwnProperty(trackId)) {
 			delete app.core.userList[trackId];
 			$(this).text('Add to List');
+			$userBar.addClass('track-removed');
     	} else {
 			app.core.userList[trackId] = app.core.queryList[trackId];
 			app.core.userList[trackId].onUserList = true;
 			$(this).text('Remove');
-    	}
+			$userBar.addClass('track-added');
+		}
+
+		userBarTimeout = setTimeout(function() {
+			$userBar.removeClass('track-removed track-added');
+		}, 1000);
 
     	updateUserListCount();
 
@@ -274,8 +298,8 @@ function viewport() {
 
 	function centerSearchBox() {
 		var $searchBox = $('.search-wrapper');
-		var $inputBarPos = $searchBox.find('input').offset().top;
-		var searchBoxY = ( viewport().height - $searchBox.height() ) / 2 - $inputBarPos;
+		var userBarHeight = $('.user-bar').outerHeight();
+		var searchBoxY = ( viewport().height - $searchBox.outerHeight() ) / 2 - userBarHeight;
 
 		$searchBox.css({
 			transform: 'translate3d(0,'+searchBoxY+'px,0)'
@@ -285,6 +309,7 @@ function viewport() {
 	function moveSearchBox() {
 		var $searchWrapper = $('.search-wrapper');
 
+		$(window).off('resize');
 		$searchWrapper.css({
 			transform: 'translate3d(0,0,0)'
 		});
@@ -305,4 +330,4 @@ function viewport() {
 
 		$img[0].src = imageUrl;
 	}
-})(window, document, app, jQuery, store, io);
+})(window, document, app, jQuery, _, store, io);

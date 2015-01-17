@@ -4,9 +4,12 @@ Web app that displays helpful information on songs fetched from third-party musi
 [MixAsst Website](http://mixasst.callinaryarts.co)
 
 ## TODO
-- Spec confidence indicators
-- Loading indicators
 - Error handling
+- Spotify playlist actions
+- Spec confidence indicators
+
+## Running Bugs
+[Passing multiple ID's in a query doesn't return all data](http://developer.echonest.com/forums/thread/745)
 
 ## Inspiration
 At the very early stage of creating a music mashup, DJs dedicate most of their effort to finding compatible song pairings. Many song characteristics are taken into account, including but not limited to: song key, tempo, genre, lyrics.
@@ -28,12 +31,16 @@ $ bower install
 </pre>
 
 Run `grunt serve` in the root to start the server at `localhost:7000`.
+Run `grunt` to create a production build in `/dist`.
+
+Run `grunt lodash` to build a custom lodash script inside `/public/js`.
 
 ## Stack Overview
 - [Spotify Web API](https://developer.spotify.com/web-api/)
 - [The Echo Nest API](http://developer.echonest.com/)
 - [echojs](https://github.com/tcr/echojs) - Echo Nest node.js helper
 - [jQuery](http://jquery.com/)
+- [Lo-Dash](https://lodash.com/)
 - [store.js](https://github.com/marcuswestin/store.js) - localStorage helper
 - [Handlebars](http://handlebarsjs.com/)
 - [Grunt](http://gruntjs.com/)

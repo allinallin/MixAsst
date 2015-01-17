@@ -127,11 +127,11 @@ module.exports = function(app, request, querystring, Promise, echo, io, _) {
                     uri: track.uri,
                     name: track.name,
                     album: {
-                        image_url: track.album.images[1].url,
+                        imageUrl: track.album.images[1].url,
                         name: track.album.name
                     },
                     artist: _.pluck(track.artists, 'name').join(', '),
-                    preview_url: track.preview_url
+                    previewUrl: track.preview_url
                 };
             });
         }
@@ -178,16 +178,19 @@ module.exports = function(app, request, querystring, Promise, echo, io, _) {
 
         function getWhosampledUrl(buckets) {
             if (!buckets.whosampled) return;
-            var baseUrl = 'http://www.whosampled.com/track/view/';            
-            return baseUrl + buckets.whosampled.foreign_id.split(':')[2];
+            var baseUrl = 'http://www.whosampled.com/track/view/'; 
+            return _.map(buckets.whosampled, function(item) {
+                return baseUrl + item.foreign_id.split(':')[2];
+            });
         }
 
         function getSpotifyIds(buckets, trackIds) {
             if (!buckets.spotify) return;
-            return _.map(buckets.spotify, function(item) {
+            return _.reduce(buckets.spotify, function(acc, item) {
                 if (trackIds.indexOf( item.foreign_id ) !== -1)
-                    return item.foreign_id
-            });
+                    acc.push(item.foreign_id);
+                return acc;
+            }, []);
         }
 
         function mergeIntoResults(specResults) {

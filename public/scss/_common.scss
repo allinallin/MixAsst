@@ -1,3 +1,13 @@
+@keyframes flash-green {
+    to {
+        background-color: #2ECC40;
+    }
+}
+@keyframes flash-red {
+    to {
+        background-color: #FF4136;
+    }
+}
 html, body {
     overflow-x: hidden;
     height: 100%;
@@ -46,13 +56,29 @@ img {
     width: 100%;
     background: black;
     text-align: center;
-    padding: 0.5em 0;
-    button {
+    padding: 0.7em 0;
+    > * {
+        padding: 0;
         letter-spacing: 0.05em;
+        text-transform: uppercase;
+    }
+    button {
         -webkit-appearance: none;
         border: 0;
         background: transparent;
-        text-transform: uppercase;
+    }
+    .msg {
+        display: none;
+    }
+    &.track-added {
+        animation: flash-green 0.25s ease-out 0s 2 alternate;
+        button { display: none; }
+        .added { display: block;}
+    }
+    &.track-removed {
+        animation: flash-red 0.25s ease-out 0s 2 alternate;
+        button { display: none; }
+        .removed { display: block;}
     }
 }
 .no-transition { transition: none!important; }
