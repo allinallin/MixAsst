@@ -18,11 +18,12 @@ var app = {
 /* Helper Functions */
 
 (function injectLivereload(window, document) {
-	if (!location.host.indexOf('localhost') > -1 && !location.host.indexOf('127.0.0.1') > -1) {
-		document.write('<script src="http://'
-		+ window.location.hostname
-		+ ':35729/livereload.js?snipver=1"><\/script>')
-	}
+	if (location.host.indexOf('localhost') === -1 && location.host.indexOf('127.0.0.1') === -1)
+		return;
+
+	document.write('<script src="http://'
+	+ window.location.hostname
+	+ ':35729/livereload.js?snipver=1"><\/script>');
 })(window, document);
 
 function viewport() {
