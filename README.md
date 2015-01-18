@@ -4,9 +4,9 @@ Web app that displays helpful information on songs fetched from third-party musi
 [MixAsst Website](http://mixasst.callinaryarts.co)
 
 ## TODO
-- Error handling
 - Spotify playlist actions
 - Spec confidence indicators
+- Fallback for specs bug (see below)
 
 ## Running Bugs
 [Passing multiple ID's in a query doesn't return all data](http://developer.echonest.com/forums/thread/745)
