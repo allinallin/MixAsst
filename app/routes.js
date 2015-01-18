@@ -11,37 +11,30 @@
  *
  */
 module.exports = function(app, request, querystring, Promise, echo, io, _) {
-    var requestP = Promise.promisify(request);
-
     app.get('/search', function(req, res) {
+        var client = {
+            queryId: parseInt(req.headers['query-id']),
+            socketId: req.headers['socket-id']
+        };
         var searchResults = {
             json: {},
             trackIds: []
         };
-
-        var queryId = parseInt(req.headers['query-id']);
-        var socketId = req.headers['socket-id'];
-
-        var spotifyReqUrl = 'https://api.spotify.com/v1/search?';
-        spotifyReqUrl += querystring.stringify({
-            q: req.query.q,
-            type: 'track',
-            limit: 7
-        });
         
         updateQueryProgress(0);
 
-        // https://api.spotify.com/v1/search
-        requestP(spotifyReqUrl)
-            .spread(function(response, body) {
-                var status = {
-                    code: response.statusCode
-                };
+        getTrackList()
+            .then(function(contents) {
+                var jsonFull = contents.tracks.items;
 
-                if (ClientError(status.code) || SpotifyError(status.code))
-                    throw new Error("Oh no!");
+                if (!jsonFull.length) {
+                    throw new AbortError({
+                        status: 200,
+                        message: 'No track list results',
+                        payload: searchResults.json
+                    });
+                }
 
-                var jsonFull = JSON.parse(body).tracks.items;
                 var jsonShort = condenseSpotifyJSON(jsonFull);
 
                 searchResults.json = addTopLevelToJson(jsonShort, 'uri');
@@ -49,31 +42,118 @@ module.exports = function(app, request, querystring, Promise, echo, io, _) {
 
                 updateQueryProgress(1);
 
-                return getTrackSpecs(searchResults.trackIds); // Promise
+                // return Promise
+                return getTrackSpecs(searchResults.trackIds);
             })
-            // http://developer.echonest.com/docs/v4/song/profile
             .then(function(contents) {
-                var status = {
-                    code: contents.response.status.code,
-                    message: contents.response.status.message
-                };
-
-                if (ClientError(status.code) || EchonestError(status.code))
-                    throw new Error("Oh no!");
-
                 var jsonFull = contents.response.songs;
-                var jsonShort = condenseEchonestJSON(jsonFull, searchResults.trackIds);
 
-                return mergeIntoResults(jsonShort); // Json
+                if (!jsonFull || !jsonFull.length) {
+                    throw new AbortError({
+                        status: 200,
+                        message: 'No track spec results',
+                        payload: searchResults.json
+                    });
+                }
+
+                var jsonShort = condenseEchoNestJSON(jsonFull, searchResults.trackIds);
+
+                // return value
+                return mergeIntoResults(jsonShort);
             })
-            .then(function(jsonFinal) {
+            .then(function(payload) {
                 updateQueryProgress(2);
-                res.send(jsonFinal);
+                res.send(payload);
+            })
+            .catch(ApiError, function(err) {
+                console.log(err);
+                res.status(err.status).send(err.toString());
+            })
+            .catch(AbortError, function(err) {
+                console.log(err);
+                updateQueryProgress(2);
+                res.status(err.status).send(err.payload);
             })
             .catch(function(err) {
                 console.log(err);
-                res.send(err);
+                res.status(500).send(err.toString());
             });
+
+        function getTrackList() {
+            return new Promise(function(resolve, reject) {
+                // https://api.spotify.com/v1/search
+                var spotifyReqUrl = 'https://api.spotify.com/v1/search?';
+                spotifyReqUrl += querystring.stringify({
+                    q: req.query.q,
+                    type: 'track',
+                    limit: 7
+                });
+                request(spotifyReqUrl, function(error, response, body) {
+                    var jsonFull = JSON.parse(body);
+                    
+                    if (jsonFull.error) {
+                        // https://developer.spotify.com/web-api/user-guide/#response-status-codes
+                        reject(new ApiError({
+                            name: 'SpotifyError',
+                            status: jsonFull.error.status,
+                            message: jsonFull.error.message
+                        }));
+                    } else {
+                        resolve(jsonFull);
+                    }
+                });
+            });
+        }
+
+        function getTrackSpecs(trackArray) {
+            return new Promise(function(resolve, reject) {
+                // http://developer.echonest.com/docs/v4/song/profile
+                echo('song/profile').get({
+                    track_id: trackArray,
+                    bucket: ['audio_summary', 'tracks', 'id:whosampled', 'id:spotify']
+                }, function(err, json) {
+                    if (err) {
+                        // http://developer.echonest.com/docs/v4/#response-codes
+                        reject(new ApiError({
+                            name: 'EchoNestError',
+                            status: err,
+                            code: json.response.status.code,
+                            message: json.response.status.message
+                        }));
+                    } else {
+                        resolve(json);
+                    }
+                });
+            });
+        }
+
+        function ApiError(errorObj) {
+            this.name = 'ApiError';
+            this.status = 400;
+            this.message = '';
+            if (errorObj) _.assign(this, errorObj);
+            Error.captureStackTrace(this, ApiError);
+        }
+
+        ApiError.prototype = Object.create(Error.prototype);
+        ApiError.prototype.constructor = ApiError;
+
+        function AbortError(errorObj) {
+            this.name = 'AbortError';
+            this.status = 200;
+            this.message = '';
+            this.payload = {};
+            if (errorObj) _.assign(this, errorObj);
+            Error.captureStackTrace(this, AbortError);
+        }
+
+        AbortError.prototype = Object.create(Error.prototype);
+        AbortError.prototype.constructor = AbortError;
+        
+        function updateQueryProgress(msg) {
+            if (!client.socketId) return;
+            io.sockets.connected[client.socketId].emit('progress', {queryId: client.queryId, stage: msg});
+        }
 
         function addTopLevelToJson(targetJson, targetKey) {
             var newObj = {};
@@ -87,38 +167,6 @@ module.exports = function(app, request, querystring, Promise, echo, io, _) {
             };
 
             return newObj;
-        }
-
-        function getTrackSpecs(trackArray) {
-            return new Promise(function(resolve, reject) {
-                echo('song/profile').get({
-                    track_id: trackArray,
-                    bucket: ['audio_summary', 'tracks', 'id:whosampled', 'id:spotify']
-                }, function(err, json) {
-                    if (err) {
-                        reject(err);
-                    } else if (json) {
-                        resolve(json);
-                    }
-                });
-            });
-        }
-        
-        function updateQueryProgress(msg) {
-            if (!socketId) return;
-            io.sockets.connected[socketId].emit('progress', {queryId: queryId, stage: msg});
-        }
-        
-        function ClientError(e) {
-            return e.code >= 400 && e.code < 500;
-        }
-
-        function SpotifyError(e) {
-            return e.code == 200;
-        }
-
-        function EchonestError(e) {
-            return e.code == 0;
         }
 
         function condenseSpotifyJSON(jsonFull) {
@@ -136,7 +184,7 @@ module.exports = function(app, request, querystring, Promise, echo, io, _) {
             });
         }
 
-        function condenseEchonestJSON(jsonFull, trackIds) {
+        function condenseEchoNestJSON(jsonFull, trackIds) {
             return _.map(jsonFull, function(track) {
                 var trackBuckets = _.groupBy(track.tracks, 'catalog');
                 return {
@@ -204,7 +252,7 @@ module.exports = function(app, request, querystring, Promise, echo, io, _) {
                 for (var j = 0; j < jlen; j++) {
                     var uri = track.uriAliases[j];
                     if (mainResults.hasOwnProperty(uri)) {
-                        _.extend(mainResults[uri], track);
+                        _.assign(mainResults[uri], track);
                         delete mainResults[uri].uriAliases;
                     }
                 };

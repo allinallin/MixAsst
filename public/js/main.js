@@ -61,7 +61,7 @@ function viewport() {
 	   	$(window)
 	   		.on('resize', throttleCenterSearchBox);
 		$(document)
-			.on('click', '.user-bar button', renderUserList)
+			.on('click', '.user-bar button', handleUserListTrigger)
 	    	.on('click', '.action button', addRemoveTrack)
 	    	.on('click', '.audio-controls', playPauseTrack)
 	    	.on('trackListLoaded', onTrackListLoaded);
@@ -72,7 +72,7 @@ function viewport() {
 	function onSearchSubmit(e) {
 		e.preventDefault();
 		var $input = $('input', this);
-		var searchVal = $input.val();
+		var searchVal = $input.val().trim();
 
 		if (!searchVal) {
 			searchVal = 'firework katy perry';
@@ -83,6 +83,7 @@ function viewport() {
 
 		moveSearchBox();
 		endActiveQuery();
+		hideMessageBoxes();
 		showLoadingBox();
 
 		$('.container').attr('data-mode', 'query');
@@ -101,13 +102,14 @@ function viewport() {
 				'query-id': app.core.activeQuery.id,
 				'socket-id': app.core.socketId
 			},
-			success: onSuccess
+			success: onAjaxSuccess,
+			error: showErrorBox
 	    });
 
-		function onSuccess(data) {
+		function onAjaxSuccess(data) {
 			if (callback && typeof(callback) == 'function')
 				callback(data);
-		} 
+		}
 	}
 
 	function endActiveQuery() {
@@ -115,7 +117,14 @@ function viewport() {
 		
 		app.core.activeQuery.ajax.abort();
 		app.core.activeQuery.ajax = null;
+	}
+
+	/* MESSAGE BOXES */
+
+	function hideMessageBoxes() {
 		hideLoadingBox();
+		hideErrorBox();
+		hideNoResultsBox();
 	}
 	
 	/* LOADING BOX */
@@ -141,6 +150,30 @@ function viewport() {
 		changeLoadingStage({queryId: app.core.activeQuery.id, stage: 0});
 	}
 
+	/* ERROR BOX */
+
+	function showErrorBox(data) {
+		hideLoadingBox();
+		$('.error-box .status').text(data.status);
+		$('.error-box .message').text(data.responseText);
+	    animateNodeFromBottom($('.error-box'));
+	}
+
+	function hideErrorBox() {
+		$('.error-box').removeClass('show');
+	}
+
+	/* NO RESULTS BOX */
+
+	function showNoResultsBox() {
+		$('.list').html('');
+	    animateNodeFromBottom($('.no-results-box'));
+	}
+
+	function hideNoResultsBox() {
+		$('.no-results-box').removeClass('show');
+	}
+
 	/* TRACKLIST RENDERING */
 
 	function updateUserListCount() {
@@ -151,19 +184,24 @@ function viewport() {
 	}
 
 	function renderQueryList( jsonResults ) {
+		hideLoadingBox();
+
+		if ($.isEmptyObject(jsonResults)) {
+			showNoResultsBox();
+			return;
+		}
+		
 		var hbsSource = $('#track-list-template').html();
 		var hbsTemplate = Handlebars.compile( hbsSource );
 		var $hbsPlaceholder = $('.list', '.query-list');
 		var userList = app.core.userList;
 
-		$('.container').attr('data-mode', 'query');
 		for (var trackId in userList) {
 			if (userList.hasOwnProperty(trackId) && jsonResults.hasOwnProperty(trackId)) {
 				jsonResults[trackId].onUserList = true;
 			}
 		}
 
-		hideLoadingBox();
 		$hbsPlaceholder.html( hbsTemplate( jsonResults ) );
 		
 		$.event.trigger({
@@ -174,14 +212,24 @@ function viewport() {
 		app.core.queryList = jsonResults;
 	}
 
+	function handleUserListTrigger() {
+		moveSearchBox();
+		endActiveQuery();
+		hideMessageBoxes();
+		
+		$('.container').attr('data-mode', 'user');
+		renderUserList();
+	}
+
 	function renderUserList() {
+		if ($.isEmptyObject(app.core.userList)) {
+			showNoResultsBox();
+		}
+
 		var hbsSource = $('#track-list-template').html();
 		var hbsTemplate = Handlebars.compile( hbsSource );
 		var $hbsPlaceholder = $('.list', '.user-list');
 
-		endActiveQuery();
-
-		$('.container').attr('data-mode', 'user');
 		$hbsPlaceholder.html( hbsTemplate( app.core.userList ) );
 
 		$.event.trigger({
@@ -191,7 +239,6 @@ function viewport() {
 	}
 
 	function onTrackListLoaded(data) {
-		moveSearchBox();
     	animateNodeFromBottom($('.track'));
 
     	for (var track in data.tracks) {
