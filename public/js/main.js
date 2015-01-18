@@ -72,7 +72,7 @@ function viewport() {
 	function onSearchSubmit(e) {
 		e.preventDefault();
 		var $input = $('input', this);
-		var searchVal = $input.val();
+		var searchVal = $input.val().trim();
 
 		if (!searchVal) {
 			searchVal = 'firework katy perry';
@@ -101,13 +101,18 @@ function viewport() {
 				'query-id': app.core.activeQuery.id,
 				'socket-id': app.core.socketId
 			},
-			success: onSuccess
+			success: onAjaxSuccess,
+			error: onAjaxError
 	    });
 
-		function onSuccess(data) {
+		function onAjaxSuccess(data) {
 			if (callback && typeof(callback) == 'function')
 				callback(data);
-		} 
+		}
+
+		function onAjaxError(data) {
+			// console.log(data);
+		}
 	}
 
 	function endActiveQuery() {
