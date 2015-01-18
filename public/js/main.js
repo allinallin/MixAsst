@@ -216,9 +216,9 @@ function viewport() {
 		moveSearchBox();
 		endActiveQuery();
 		hideMessageBoxes();
-		renderUserList();
-
+		
 		$('.container').attr('data-mode', 'user');
+		renderUserList();
 	}
 
 	function renderUserList() {
