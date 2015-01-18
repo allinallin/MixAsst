@@ -12,8 +12,10 @@
  */
 module.exports = function(app, request, querystring, Promise, echo, io, _) {
     app.get('/search', function(req, res) {
-        var queryId = parseInt(req.headers['query-id']);
-        var socketId = req.headers['socket-id'];
+        var client = {
+            queryId: parseInt(req.headers['query-id']),
+            socketId: req.headers['socket-id']
+        };
         var searchResults = {
             json: {},
             trackIds: []
@@ -63,22 +65,18 @@ module.exports = function(app, request, querystring, Promise, echo, io, _) {
                 updateQueryProgress(2);
                 res.send(payload);
             })
-            .catch(SpotifyError, function(err) {
+            .catch(ApiError, function(err) {
                 console.log(err);
-                res.status(err.status).send(err.message);
-            })
-            .catch(EchoNestError, function(err) {
-                console.log(err);
-                res.status(err.status).send(err.message);
+                res.status(err.status).send(err.toString());
             })
             .catch(AbortError, function(err) {
-                console.log(err.message);
+                console.log(err);
                 updateQueryProgress(2);
                 res.status(err.status).send(err.payload);
             })
             .catch(function(err) {
                 console.log(err);
-                res.send(err);
+                res.status(500).send(err.toString());
             });
 
         function getTrackList() {
@@ -95,7 +93,8 @@ module.exports = function(app, request, querystring, Promise, echo, io, _) {
                     
                     if (jsonFull.error) {
                         // https://developer.spotify.com/web-api/user-guide/#response-status-codes
-                        reject(new SpotifyError({
+                        reject(new ApiError({
+                            name: 'SpotifyError',
                             status: jsonFull.error.status,
                             message: jsonFull.error.message
                         }));
@@ -115,7 +114,8 @@ module.exports = function(app, request, querystring, Promise, echo, io, _) {
                 }, function(err, json) {
                     if (err) {
                         // http://developer.echonest.com/docs/v4/#response-codes
-                        reject(new EchoNestError({
+                        reject(new ApiError({
+                            name: 'EchoNestError',
                             status: err,
                             code: json.response.status.code,
                             message: json.response.status.message
@@ -127,32 +127,23 @@ module.exports = function(app, request, querystring, Promise, echo, io, _) {
             });
         }
 
-        function SpotifyError(errorObj) {
-            this.name = 'SpotifyError';
-            this.status = errorObj.status;
-            this.message = errorObj.message;
-            Error.captureStackTrace(this, SpotifyError);
+        function ApiError(errorObj) {
+            this.name = 'ApiError';
+            this.status = 400;
+            this.message = '';
+            if (errorObj) _.assign(this, errorObj);
+            Error.captureStackTrace(this, ApiError);
         }
 
-        SpotifyError.prototype = Object.create(Error.prototype);
-        SpotifyError.prototype.constructor = SpotifyError;
-
-        function EchoNestError(errorObj) {
-            this.name = 'EchoNestError';
-            this.status = errorObj.status;
-            this.code = errorObj.code;
-            this.message = errorObj.message;
-            Error.captureStackTrace(this, EchoNestError);
-        }
-
-        EchoNestError.prototype = Object.create(Error.prototype);
-        EchoNestError.prototype.constructor = EchoNestError;
+        ApiError.prototype = Object.create(Error.prototype);
+        ApiError.prototype.constructor = ApiError;
 
         function AbortError(errorObj) {
             this.name = 'AbortError';
-            this.status = errorObj.status;
-            this.message = errorObj.message;
-            this.payload = errorObj.payload;
+            this.status = 200;
+            this.message = '';
+            this.payload = {};
+            if (errorObj) _.assign(this, errorObj);
             Error.captureStackTrace(this, AbortError);
         }
 
@@ -160,8 +151,8 @@ module.exports = function(app, request, querystring, Promise, echo, io, _) {
         AbortError.prototype.constructor = AbortError;
         
         function updateQueryProgress(msg) {
-            if (!socketId) return;
-            io.sockets.connected[socketId].emit('progress', {queryId: queryId, stage: msg});
+            if (!client.socketId) return;
+            io.sockets.connected[client.socketId].emit('progress', {queryId: client.queryId, stage: msg});
         }
 
         function addTopLevelToJson(targetJson, targetKey) {
@@ -261,7 +252,7 @@ module.exports = function(app, request, querystring, Promise, echo, io, _) {
                 for (var j = 0; j < jlen; j++) {
                     var uri = track.uriAliases[j];
                     if (mainResults.hasOwnProperty(uri)) {
-                        _.extend(mainResults[uri], track);
+                        _.assign(mainResults[uri], track);
                         delete mainResults[uri].uriAliases;
                     }
                 };

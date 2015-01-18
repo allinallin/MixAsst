@@ -1,4 +1,4 @@
-.loading-box {
+.message-box {
 	display: none;
 	width: 200px;
 	height: 100px;
@@ -21,6 +21,11 @@
 	.fa {
 		font-size: 2em;
 	}
+}
+.error-box {
+	span { display: none; }
+}
+.loading-box {
 	ul {
 		list-style-type: none;
 		padding: 0;
