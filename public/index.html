@@ -13,11 +13,12 @@
 <body>
 	<div class="body-bg"></div>
 	<div class="container">
+	
 		<div class="search-wrapper">
 			<!-- <h1>MixAsst</h1> -->
 			<p>search for a song</p>
 			<form class="search-form">
-				<input type="text" placeholder="firework katy perry">
+				<input type="text" placeholder="firework katy perry" name="query">
 				<button class="btn-primary"><i class="fa fa-search"></i></button>
 			</form>
 		</div>
@@ -27,6 +28,13 @@
 		</div>
 		<div class="user-list">
 			<h2>My List</h2>
+			<a href="/login"><i class="fa fa-spotify"></i> Sign In</a>
+			<form class="create-playlist-form">
+				<input type="text" placeholder="Awesome Mix 6" name="playlist-name"><br>
+				<input type="checkbox" id="public-toggle" checked>
+				<label for="public-toggle">Make Public</label><br>
+				<button><i class="fa fa-spotify"></i> Create playlist</button>
+			</form>
 			<div class="list"></div>
 		</div>
 

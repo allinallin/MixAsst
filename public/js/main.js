@@ -54,10 +54,17 @@ function viewport() {
 	/* LISTENERS */
 	$(function() {
     	updateUserListCount();
-		centerSearchBox();
+    	
+    	// handle path /#mylist
+    	if (location.hash === '#mylist') {
+			$('.container').attr('data-mode', 'user');
+			renderUserList();
+		} else {
+			centerSearchBox();
+		}	
 
 	    $('.search-form').on('submit', onSearchSubmit);
-
+	    $('.create-playlist-form').on('submit', onCreatePlaylistSubmit);
 	   	$(window)
 	   		.on('resize', throttleCenterSearchBox);
 		$(document)
@@ -67,6 +74,15 @@ function viewport() {
 	    	.on('trackListLoaded', onTrackListLoaded);
 
 	});
+
+	function onCreatePlaylistSubmit(e) {
+		e.preventDefault();
+		var inputName = $('input[type=text]', this).val();
+		var inputPublic = $('input[type=checkbox]', this).is(':checked');
+		var tracks = Object.keys(app.core.userList);
+
+		app.api.createPlaylist(inputName, inputPublic, tracks);
+	}
 
 	/* SEARCH QUERY */
 	function onSearchSubmit(e) {
@@ -88,6 +104,28 @@ function viewport() {
 
 		$('.container').attr('data-mode', 'query');
     	app.api.searchQuery( searchVal, renderQueryList );
+	}
+
+	app.api.createPlaylist = function(playlistName, isPublic, trackIds, callback) {
+		$.ajax({
+			type: 'POST',
+			url: '/createplaylist',
+			data: {
+				name: playlistName,
+				isPublic: isPublic,
+				tracks: trackIds
+			},
+			success: onAjaxSuccess,
+			error: onAjaxError
+		});
+
+		function onAjaxSuccess(data) {
+			console.log(data);
+		}
+
+		function onAjaxError(data) {
+			console.log(data);
+		}
 	}
 
 	app.api.searchQuery = function ( searchValue, callback ) {
@@ -217,6 +255,7 @@ function viewport() {
 		endActiveQuery();
 		hideMessageBoxes();
 		
+		window.history.replaceState({}, '', '#mylist');
 		$('.container').attr('data-mode', 'user');
 		renderUserList();
 	}

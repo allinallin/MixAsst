@@ -82,3 +82,27 @@ img {
     }
 }
 .no-transition { transition: none!important; }
+[name=playlist-name],
+button {
+    color: black;
+}
+input[type=checkbox] {
+    opacity: 0;
+    position: absolute;
+    visibility: hidden;
+    + label {
+        font-size: 1.5em;
+    }
+    + label:before {
+        content: '\f204';
+        font-family: FontAwesome;
+        font-weight: normal;
+        font-style: normal;
+        display: inline-block;
+        text-decoration: inherit;
+        color: #2ECC40;
+    }
+    &:checked + label:before {
+        content: '\f205';
+    }
+}
