@@ -28,13 +28,7 @@
 		</div>
 		<div class="user-list">
 			<h2>My List</h2>
-			<a href="/login"><i class="fa fa-spotify"></i> Sign In</a>
-			<form class="create-playlist-form">
-				<input type="text" placeholder="Awesome Mix 6" name="playlist-name"><br>
-				<input type="checkbox" id="public-toggle" checked>
-				<label for="public-toggle">Make Public</label><br>
-				<button><i class="fa fa-spotify"></i> Create playlist</button>
-			</form>
+			<div class="actions"></div>
 			<div class="list"></div>
 		</div>
 
@@ -65,6 +59,22 @@
 		<span class="msg added">Track Added!</span>
 		<span class="msg removed">Track Removed!</span>
 	</div>
+
+	<script id="user-actions-template" type="text/x-handlebars-template">
+		<div data-auth="{{auth}}">
+			<div class="no-auth">
+				<a href="/login"><i class="fa fa-spotify"></i> Sign In</a>
+			</div>
+			<div class="auth">
+				<form class="create-playlist-form">
+					<input type="text" placeholder="Awesome Mix 6" name="playlist-name"><br>
+					<input type="checkbox" id="public-toggle" class="public-toggle" checked>
+					<label for="public-toggle">Make Public</label><br>
+					<button><i class="fa fa-spotify"></i> Create playlist</button>
+				</form>
+			</div>
+		</div>
+	</script>
 	
 	<script id="track-list-template" type="text/x-handlebars-template">
 		{{#each this}}

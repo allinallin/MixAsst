@@ -48,12 +48,33 @@ function viewport() {
 	/* USERLIST CACHE */
 	app.core.userList = store.get('mixasst_user_list') || {};
 
+	/* DEFAULT AUTH STATE */
+	sessionStorage.setItem('mixasst_auth', 'false');
+
 	/* RESIZE EVENT SETUP */
 	var throttleCenterSearchBox = _.throttle(centerSearchBox, 250);
 
 	/* LISTENERS */
 	$(function() {
     	updateUserListCount();
+
+    	// handle auth state
+		if (location.search === '?auth=success') {
+			sessionStorage.setItem('mixasst_auth', 'true');
+			window.history.replaceState({}, '', location.origin + location.pathname + location.hash);
+		} else if (location.search === '?auth=error') {
+			// error state
+		}
+
+	   	$(window)
+	   		.on('resize', throttleCenterSearchBox);
+		$(document)
+	    	.on('trackListLoaded', onTrackListLoaded)
+			.on('submit', '.search-form', onSearchSubmit)
+			.on('submit', '.create-playlist-form', onCreatePlaylistSubmit)
+			.on('click', '.user-bar button', handleUserListTrigger)
+	    	.on('click', '.action button', addRemoveTrack)
+	    	.on('click', '.audio-controls', playPauseTrack);
     	
     	// handle path /#mylist
     	if (location.hash === '#mylist') {
@@ -61,17 +82,7 @@ function viewport() {
 			renderUserList();
 		} else {
 			centerSearchBox();
-		}	
-
-	    $('.search-form').on('submit', onSearchSubmit);
-	    $('.create-playlist-form').on('submit', onCreatePlaylistSubmit);
-	   	$(window)
-	   		.on('resize', throttleCenterSearchBox);
-		$(document)
-			.on('click', '.user-bar button', handleUserListTrigger)
-	    	.on('click', '.action button', addRemoveTrack)
-	    	.on('click', '.audio-controls', playPauseTrack)
-	    	.on('trackListLoaded', onTrackListLoaded);
+		}
 
 	});
 
@@ -275,6 +286,16 @@ function viewport() {
 			type: 'trackListLoaded',
 			tracks: app.core.userList
 		});
+
+		renderUserActions();
+	}
+
+	function renderUserActions() {
+		var hbsSource = $('#user-actions-template').html();
+		var hbsTemplate = Handlebars.compile( hbsSource );
+		var $hbsPlaceholder = $('.actions', '.user-list');
+
+		$hbsPlaceholder.html( hbsTemplate( {auth: sessionStorage.getItem('mixasst_auth') } ) );
 	}
 
 	function onTrackListLoaded(data) {

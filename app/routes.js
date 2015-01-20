@@ -82,7 +82,7 @@ module.exports = function(app, request, querystring, Promise, spotifyApi, echo, 
                 .then(function(data) {
                     res.clearCookie('mixasst_userid');
                     res.cookie('mixasst_userid', data.id);
-                    res.redirect('/#mylist');
+                    res.redirect('/?auth=success#mylist');
                 })
                 .catch(function(err) {
                     console.log(err);
