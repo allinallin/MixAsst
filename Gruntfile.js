@@ -58,7 +58,7 @@ module.exports = function(grunt) {
                         nodemon.on('config:update', function() {
                             // Delay before server listens on port
                             setTimeout(function() {
-                                require('open')('http://localhost:7000');
+                                require('open')('http://127.0.0.1:7000');
                             }, 1000);
                         });
                         // refreshes browser when server reboots

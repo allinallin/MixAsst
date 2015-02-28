@@ -10,7 +10,108 @@
  *  You should use the same approach for your own callbacks.
  *
  */
-module.exports = function(app, request, querystring, Promise, echo, io, _) {
+module.exports = function(app, request, querystring, Promise, spotifyApi, echo, io, _) {
+    
+    var generateRandomString = function(length) {
+        var text = '';
+        var possible = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+
+        for (var i = 0; i < length; i++) {
+            text += possible.charAt(Math.floor(Math.random() * possible.length));
+        }
+        return text;
+    };
+
+    function ApiError(errorObj) {
+        this.name = 'ApiError';
+        this.status = 400;
+        this.message = '';
+        if (errorObj) _.assign(this, errorObj);
+        Error.captureStackTrace(this, ApiError);
+    }
+
+    function requireAuthentication(req, res, next) {
+        if (spotifyApi.getAccessToken()) {
+            next();
+        } else {
+            res.redirect('/login');
+        }
+    }
+
+    ApiError.prototype = Object.create(Error.prototype);
+    ApiError.prototype.constructor = ApiError;
+
+    app.get('/login', function(req, res) {
+        var scope = [
+            'playlist-read-private', 
+            'playlist-modify-public', 
+            'playlist-modify-private'
+        ];
+        var state = generateRandomString(16);
+        var redirectURI = req.protocol + '://' + req.get('host') + '/callback';
+        spotifyApi.setRedirectURI(redirectURI);
+        var authorizeURL = spotifyApi.createAuthorizeURL(scope, state);
+        
+        res.cookie('mixasst_auth_state', state);
+        res.redirect(authorizeURL);
+    });
+
+    app.get('/callback', function(req, res) {
+        var code = req.query.code || null;
+        var state = req.query.state || null;
+        var storedState = req.cookies ? req.cookies['mixasst_auth_state'] : null;
+
+        if (state === null || state !== storedState) {
+            res.redirect('/#' +
+                querystring.stringify({ error: 'state_mismatch' })
+            );
+        } else {
+            res.clearCookie('mixasst_auth_state');
+            spotifyApi.authorizationCodeGrant(code)
+                .then(function(data) {
+                    // console.log('The token expires in ' + data['expires_in']);
+                    // console.log('The access token is ' + data['access_token']);
+                    // console.log('The refresh token is ' + data['refresh_token']);
+
+                    // Set the access token on the API object to use it in later calls
+                    spotifyApi.setAccessToken(data['access_token']);
+                    spotifyApi.setRefreshToken(data['refresh_token']);
+
+                    return spotifyApi.getMe();
+                })
+                .then(function(data) {
+                    res.clearCookie('mixasst_userid');
+                    res.cookie('mixasst_userid', data.id);
+                    res.redirect('/?auth=success#mylist');
+                })
+                .catch(function(err) {
+                    console.log(err);
+                    res.redirect('/#' +
+                        querystring.stringify({ error: 'invalid_token' })
+                    );
+                });
+        }
+    });
+
+    app.post('/createplaylist', requireAuthentication, function(req, res) {
+        var userId = req.cookies['mixasst_userid'];
+        var isPublic = (req.body.isPublic === 'true');
+        var playlistName = req.body.name;
+
+        spotifyApi.createPlaylist(userId, req.body.name, {'public': isPublic})
+            .then(function(data) {
+                playlistName = data.name;
+                return spotifyApi.addTracksToPlaylist(userId, data.id, req.body.tracks)
+            })
+            .then(function() {
+                res.status(201).send(playlistName);
+            })
+            .catch(function(err) {
+                console.log(err);
+                res.send(err);
+            });
+    });
+
     app.get('/search', function(req, res) {
         var client = {
             queryId: parseInt(req.headers['query-id']),
@@ -23,7 +124,7 @@ module.exports = function(app, request, querystring, Promise, echo, io, _) {
         
         updateQueryProgress(0);
 
-        getTrackList()
+        getTrackList(req.query.q)
             .then(function(contents) {
                 var jsonFull = contents.tracks.items;
 
@@ -65,41 +166,36 @@ module.exports = function(app, request, querystring, Promise, echo, io, _) {
                 updateQueryProgress(2);
                 res.send(payload);
             })
-            .catch(ApiError, function(err) {
-                console.log(err);
-                res.status(err.status).send(err.toString());
-            })
             .catch(AbortError, function(err) {
                 console.log(err);
                 updateQueryProgress(2);
                 res.status(err.status).send(err.payload);
+            })
+            .catch(ApiError, function(err) {
+                console.log(err);
+                res.status(err.status).send(err.toString());
             })
             .catch(function(err) {
                 console.log(err);
                 res.status(500).send(err.toString());
             });
 
-        function getTrackList() {
+        function getTrackList(query) {
             return new Promise(function(resolve, reject) {
                 // https://api.spotify.com/v1/search
-                var spotifyReqUrl = 'https://api.spotify.com/v1/search?';
-                spotifyReqUrl += querystring.stringify({
-                    q: req.query.q,
+                spotifyApi.searchTracks(query, {
                     type: 'track',
                     limit: 7
-                });
-                request(spotifyReqUrl, function(error, response, body) {
-                    var jsonFull = JSON.parse(body);
-                    
-                    if (jsonFull.error) {
+                }, function(err, data) {
+                    if (err) {
                         // https://developer.spotify.com/web-api/user-guide/#response-status-codes
                         reject(new ApiError({
                             name: 'SpotifyError',
-                            status: jsonFull.error.status,
-                            message: jsonFull.error.message
+                            message: err.message
                         }));
                     } else {
-                        resolve(jsonFull);
+                        console.log(data);
+                        resolve(data);
                     }
                 });
             });
@@ -111,32 +207,21 @@ module.exports = function(app, request, querystring, Promise, echo, io, _) {
                 echo('song/profile').get({
                     track_id: trackArray,
                     bucket: ['audio_summary', 'tracks', 'id:whosampled', 'id:spotify']
-                }, function(err, json) {
+                }, function(err, data) {
                     if (err) {
                         // http://developer.echonest.com/docs/v4/#response-codes
                         reject(new ApiError({
                             name: 'EchoNestError',
                             status: err,
-                            code: json.response.status.code,
-                            message: json.response.status.message
+                            code: data.response.status.code,
+                            message: data.response.status.message
                         }));
                     } else {
-                        resolve(json);
+                        resolve(data);
                     }
                 });
             });
         }
-
-        function ApiError(errorObj) {
-            this.name = 'ApiError';
-            this.status = 400;
-            this.message = '';
-            if (errorObj) _.assign(this, errorObj);
-            Error.captureStackTrace(this, ApiError);
-        }
-
-        ApiError.prototype = Object.create(Error.prototype);
-        ApiError.prototype.constructor = ApiError;
 
         function AbortError(errorObj) {
             this.name = 'AbortError';
