@@ -19,7 +19,7 @@
 			<p>search for a song</p>
 			<form class="search-form">
 				<input type="text" placeholder="firework katy perry" name="query">
-				<button class="btn-primary"><i class="fa fa-search"></i></button>
+				<button><i class="fa fa-search"></i></button>
 			</form>
 		</div>
 		
@@ -27,7 +27,7 @@
 			<div class="list"></div>
 		</div>
 		<div class="user-list">
-			<h2>My List</h2>
+			<h2>my list</h2>
 			<div class="actions"></div>
 			<div class="list"></div>
 		</div>
@@ -54,7 +54,7 @@
 	</div>
 	<div class="user-bar">
 		<button>
-			My List (<span class="count">0</span>)
+			my list (<span class="count">0</span>)
 		</button>
 		<span class="msg added">Track Added!</span>
 		<span class="msg removed">Track Removed!</span>
@@ -63,15 +63,38 @@
 	<script id="user-actions-template" type="text/x-handlebars-template">
 		<div data-auth="{{auth}}">
 			<div class="no-auth">
-				<a href="/login"><i class="fa fa-spotify"></i> Sign In</a>
+				<a class="button" href="/login"><i class="fa fa-spotify"></i> sign in with spotify</a>
 			</div>
 			<div class="auth">
-				<form class="create-playlist-form">
-					<input type="text" placeholder="Awesome Mix 6" name="playlist-name"><br>
-					<input type="checkbox" id="public-toggle" class="public-toggle" checked>
-					<label for="public-toggle">Make Public</label><br>
-					<button><i class="fa fa-spotify"></i> Create playlist</button>
-				</form>
+				<button class="button create-playlist-button"><i class="fa fa-spotify"></i> make this a playlist</button>
+
+				<div class="modal create-playlist-form">
+					<form class="modal-object">
+						<div class="init">
+							<input type="text" placeholder="Awesome Mix 6" name="playlist-name"><br>
+							<input type="checkbox" id="public-toggle" class="public-toggle" checked>
+							<label for="public-toggle">make public</label>
+						</div>
+						<div class="on-success">
+							<p><span class="name">Playlist</span> has been created on your Spotify account!</p>
+						</div>
+						<div class="on-error">
+							<p>Sorry, we are having trouble making playlists. Please try again in a bit.</p>
+						</div>
+						<button class="button submit">
+							<span class="init">
+								<i class="fa fa-spotify"></i>
+								create playlist
+							</span>
+							<span class="disabled">
+								<i class="fa fa-circle-o-notch fa-spin"></i>
+								creating...
+							</span>
+						</button>
+						<button class="button close">close</button>
+						<div class="clear"></div>
+					</form>
+				</div>
 			</div>
 		</div>
 	</script>

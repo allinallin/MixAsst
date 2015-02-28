@@ -96,47 +96,20 @@ module.exports = function(app, request, querystring, Promise, spotifyApi, echo, 
     app.post('/createplaylist', requireAuthentication, function(req, res) {
         var userId = req.cookies['mixasst_userid'];
         var isPublic = (req.body.isPublic === 'true');
+        var playlistName = req.body.name;
 
-        spotifyApi.createPlaylist(userId, req.body.name)
+        spotifyApi.createPlaylist(userId, req.body.name, {'public': isPublic})
             .then(function(data) {
-                console.log(data);
+                playlistName = data.name;
                 return spotifyApi.addTracksToPlaylist(userId, data.id, req.body.tracks)
             })
-            .then(function(data) {
-                console.log(data)
-                res.send(201);
+            .then(function() {
+                res.status(201).send(playlistName);
             })
             .catch(function(err) {
                 console.log(err);
                 res.send(err);
             });
-
-        // function makeNewPlaylist(userId, playlistName, isPublic) {
-        //     return new Promise(function(resolve, reject) {
-        //         request.post({
-        //             url: 'https://api.spotify.com/v1/users/' + userId + '/playlists',
-        //             headers: {
-        //                 Authorization: 'Bearer ' + spotifyApi.getAccessToken()
-        //             },
-        //             json: true,
-        //             body: {
-        //                 name: playlistName,
-        //                 'public': isPublic
-        //             }
-        //         }, function(err, response, body) {
-        //             console.log(response);
-        //             if (body.error) {
-        //                 reject(new ApiError({
-        //                     name: 'SpotifyError',
-        //                     status: body.error.status,
-        //                     message: body.error.message
-        //                 }));
-        //             } else {
-        //                 resolve(body);
-        //             }
-        //         });
-        //     });
-        // }
     });
 
     app.get('/search', function(req, res) {

@@ -1,3 +1,35 @@
+$spotifyGreen: #84BD00;
+
+.button {
+    display: inline-block;
+    background: #322D2D;
+    color: #ccc;
+    transition: all 0.1s ease-out;
+    text-decoration: none;
+    letter-spacing: 0.02em;
+    width: 160px;
+    height: 40px;
+    line-height: 40px;
+    font-size: 0.8em;
+    box-shadow: 0 0 1px 0 rgba(0,0,0,0.4);
+    text-align: center;
+    border: 0;
+    padding: 0;
+    .fa {
+        padding-right: 0.25em;
+        font-size: 16px;
+        position: relative;
+        top: 1px;
+    }
+    &:hover {
+        background: $spotifyGreen;
+        color: white;
+        box-shadow: none;
+    }
+}
+.actions {
+    margin-bottom: 1em;
+}
 .auth {
     display: none;
 }
@@ -14,18 +46,105 @@
     position: absolute;
     visibility: hidden;
     + label {
-        font-size: 1.5em;
+        margin: 1.1em 0;
+        display: block;
+        font-size: 0.8em;
+        color: #ccc;
+        letter-spacing: 0.02em;
     }
     + label:before {
-        content: '\f204';
+        content: '\f096';
         font-family: FontAwesome;
         font-weight: normal;
         font-style: normal;
         display: inline-block;
+        width: 15px;
         text-decoration: inherit;
-        color: #2ECC40;
+        padding-right: 0.25em;
     }
     &:checked + label:before {
-        content: '\f205';
+        content: '\f046';
+        color: $spotifyGreen;
     }
+}
+.modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.3);
+    z-index: 10;
+    display: none;
+    &.show {
+        display: block;
+    }
+}
+.modal-object {
+    transition: transform 0.4s;
+    opacity: 0;
+    &.show {
+        opacity: 1;
+        transform: translate3d(0,0,0)!important;
+    }
+}
+.create-playlist-form form {
+    max-width: 300px;
+    margin: 100px auto 0;
+    background: rgba(37, 34, 34, 0.9);
+    padding: 1em;
+    box-shadow: 0 0 1px 0 rgba(0,0,0,0.4);
+    button {
+        width: 142px;
+    }
+    .disabled {
+        display: none;
+    }
+    :disabled {
+        .init { display: none; }
+        .disabled { display: block; }
+    }
+    .submit {
+        float: left;
+        color: white;
+        background: $spotifyGreen;
+    }
+    .close {
+        float: right;
+        &:hover {
+            background: #322D2D;
+        }
+    }
+    input[type=text] {
+        -webkit-appearance: none;
+        background-color: transparent;
+        border: 3px solid white;
+        border-radius: 0.5em;
+        font-size: 1.5em;
+        color: white;
+        padding: 0.5em;
+        width: 100%;
+    }
+    .on-error,
+    .on-success {
+        display: none;
+        text-align: center;
+    }
+    &.success,
+    &.error {
+        .init,
+        .submit {
+            display: none;
+        }
+    }
+    &.success .on-success,
+    &.error .on-error {
+        display: block;
+    }
+    .name {
+        font-weight: 700;
+    }
+}
+.clear {
+    clear: both;
 }

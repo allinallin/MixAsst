@@ -71,14 +71,16 @@ function viewport() {
 		$(document)
 	    	.on('trackListLoaded', onTrackListLoaded)
 			.on('submit', '.search-form', onSearchSubmit)
-			.on('submit', '.create-playlist-form', onCreatePlaylistSubmit)
+			.on('click', '.create-playlist-form', onClickPlaylistModal)
 			.on('click', '.user-bar button', handleUserListTrigger)
 	    	.on('click', '.action button', addRemoveTrack)
-	    	.on('click', '.audio-controls', playPauseTrack);
+	    	.on('click', '.audio-controls', playPauseTrack)
+	    	.on('click', '.create-playlist-button', triggerCreatePlaylist);
     	
     	// handle path /#mylist
     	if (location.hash === '#mylist') {
 			$('.container').attr('data-mode', 'user');
+			moveSearchBox();
 			renderUserList();
 		} else {
 			centerSearchBox();
@@ -86,13 +88,78 @@ function viewport() {
 
 	});
 
-	function onCreatePlaylistSubmit(e) {
-		e.preventDefault();
-		var inputName = $('input[type=text]', this).val();
-		var inputPublic = $('input[type=checkbox]', this).is(':checked');
-		var tracks = Object.keys(app.core.userList);
+	function onClickPlaylistModal(e) {
+		if ($(e.target).hasClass('close') || $(e.target).hasClass('modal')) {
+			e.preventDefault();
+			closeModal($(e.target).closest('.modal'));
+			return;
+		} else if ($(e.target).closest('button').hasClass('submit')) {
+			e.preventDefault();
+			var $form = $(e.target).closest('form');
+			var inputName = $('input[type=text]', $form).val();
+			var inputPublic = $('input[type=checkbox]', $form).is(':checked');
+			var tracks = Object.keys(app.core.userList);
+			
+			if (!inputName.trim()) {
+				inputName = 'Awesome Mix 6';
+				$('input[type=text]', $form).val('Awesome Mix 6');
+			}
+			$(e.target).closest('button').prop('disabled', true);
+			app.api.createPlaylist(inputName, inputPublic, tracks);
+		}
+	}
 
-		app.api.createPlaylist(inputName, inputPublic, tracks);
+	function showPlaylistResult(result, name) {
+		var $form = $('.create-playlist-form form');
+		var $submit = $form.find('.submit');
+
+		if (name) {
+			$form.find('.name').html(name);
+		}
+
+		$form.addClass(result);
+		$submit.prop('disabled', false);
+	}
+
+	function showPlaylistError() {
+		var $form = $('.create-playlist-form');
+		var $submit = $form.find('.submit');
+
+		$form.addClass('error');
+		$submit.prop('disabled', false);
+	}
+
+	function triggerCreatePlaylist(e) {
+		var $modal = $(e.target.parentNode).find('.modal');
+		openModal($modal);
+	}
+
+	function openModal($node) {
+		var $modalObj = $node.find('.modal-object');
+
+		$node.addClass('show');
+
+		$modalObj
+			.addClass('no-transition')
+			.removeClass('show')
+			.css({
+				transform: 'translate3d(0,'+viewport().height+'px,0)'
+			});
+		
+		$modalObj.height(); // repaint
+		
+		$modalObj
+			.removeClass('no-transition')
+			.addClass('show')
+			.find('input[type=text]')
+			.select();
+	}
+
+	function closeModal($node) {
+		var $modalObj = $node.find('.modal-object');
+
+		$modalObj.removeClass('success error');
+		$node.add($modalObj).removeClass('show');
 	}
 
 	/* SEARCH QUERY */
@@ -130,12 +197,14 @@ function viewport() {
 			error: onAjaxError
 		});
 
-		function onAjaxSuccess(data) {
-			console.log(data);
+		function onAjaxSuccess(playlistName) {
+			console.log(playlistName);
+			showPlaylistResult('success', playlistName);
 		}
 
 		function onAjaxError(data) {
 			console.log(data);
+			showPlaylistResult('error');
 		}
 	}
 
