@@ -153,6 +153,15 @@ function viewport() {
 			.addClass('show')
 			.find('input[type=text]')
 			.select();
+
+		$(window).on('keyup', shortcutCloseModal);
+	}
+
+	function shortcutCloseModal(e) {
+		if (e.keyCode === 27) {
+			var $modal = $('.create-playlist-form');
+			closeModal($modal);
+		}
 	}
 
 	function closeModal($node) {
@@ -160,6 +169,7 @@ function viewport() {
 
 		$modalObj.removeClass('success error');
 		$node.add($modalObj).removeClass('show');
+		$(window).off('keyup', shortcutCloseModal);
 	}
 
 	/* SEARCH QUERY */
